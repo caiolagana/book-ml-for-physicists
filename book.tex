@@ -1,0 +1,142 @@
+\documentclass[11pt,a4paper,oneside]{book}
+
+% ---------- Encoding & fonts ----------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[english]{babel}
+\usepackage{microtype}
+
+% ---------- Page layout ----------
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\nouppercase{\leftmark}}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ---------- Math ----------
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{bm}
+
+% ---------- Graphics, tables, code ----------
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstdefinestyle{pystyle}{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!70!black},
+  commentstyle=\color{gray},
+  stringstyle=\color{green!50!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  frame=single,
+  breaklines=true,
+  showstringspaces=false,
+}
+\lstset{style=pystyle}
+
+% ---------- References ----------
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!50!black,
+  citecolor=blue!50!black,
+  urlcolor=blue!50!black,
+}
+\usepackage{cleveref}
+
+% ---------- Theorem environments ----------
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{example}[definition]{Example}
+\newtheorem{exercise}[definition]{Exercise}
+
+\theoremstyle{plain}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{proposition}[definition]{Proposition}
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+% ---------- Custom macros ----------
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\vect}[1]{\bm{#1}}
+\newcommand{\deriv}[2]{\frac{\partial #1}{\partial #2}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+% ---------- Title ----------
+\title{\Huge Machine Learning for Physicists}
+\author{Caio Lagana}
+\date{\today}
+
+\begin{document}
+
+\frontmatter
+\maketitle
+\tableofcontents
+
+\chapter{Preface}
+
+So, you're a physicist looking to dive into the world of machine learning. You have a deep understanding of calculus, are familiar with experimental data-fitting methods, and have mastered concepts like entropy and non-linearity---yet you have only a vague idea of how a machine learning algorithm is actually written and how it works? Then this book is for you. And the good news is: your learning curve will grow fast. I've been in your shoes. I used to view machine learning as a distant horizon, but I soon realized that the knowledge I'd gained in physics made it incredibly easy to quickly master the concepts and engineering behind the field. So, come along and be amazed.
+
+\mainmatter
+
+\chapter{Single-neuron ML}
+\label{chap:single-neuron}
+
+You have been using a single-neuron network since the first time you fitted experimental data, but perhaps no one ever told you that. Let's recall the basics. You have a set of experimental data points
+\begin{equation}
+    \label{eq:xy-dataset}
+    (x_i,y_i)
+\end{equation}
+through which to fit a linear function
+\begin{equation}
+    \label{eq:linear-activation}
+    f(x)=ax+b.
+\end{equation}
+
+The Mean Squared Error, defined as
+\begin{equation}
+    \begin{split}
+        \label{eq:mse-loss}
+        \text{MSE}(a,b) &= \frac{1}{N}\sum_{i=1}^N[y_i - f(x_i)]^2 \\
+                        &= \frac{1}{N}\sum_{i=1}^N[y_i - (ax_i + b)]^2
+    \end{split}
+\end{equation}
+tells us how distant the curve $f(x)$ is from the datapoints. Fitting $f(x)$ to the datapoints $(x_i,y_i)$ means minimizing $\text{MSE}(a,b)$, that is, finding $a$ and $b$ such that
+\begin{equation}
+    \label{eq:single-neuron-backpropagation}
+    \frac{\partial}{\partial(a,b)}\text{MSE}(a,b) = 0.
+\end{equation}
+
+No surprises so far, right? Well, what if I tell you the above is the simplest possible neural network? Indeed, it is a single-neuron network, where \eqref{eq:linear-activation} is the activation function, \eqref{eq:mse-loss} is the loss function and \eqref{eq:single-neuron-backpropagation} is a very rudimentary backpropagation method.
+
+Solving \eqref{eq:single-neuron-backpropagation} for $a$ and $b$, which, in this simple case is possible analytically, fixes the parameters to $a_0$ and $b_0$
+\begin{equation}
+    \begin{split}
+        \label{eq:a0b0}
+        a_0 &= \frac{\sum_i(x_i-\bar x)(y_i-\bar y)}{\sum_i(x_i-\bar x)^2} \\
+        b_0 &= \bar y-a\bar x
+    \end{split}
+\end{equation}
+and we end up with a model $f_0(x) = a_0x+b_0$ (in \eqref{eq:a0b0}, $\bar x$ and $\bar y$ are the mean values of the $x_i$ and $y_i$ datapoints). This model is a single neuron, no hidden layers: it receives one input parameter and outputs a number. $f_0$ has learned from data \eqref{eq:xy-dataset} through \eqref{eq:single-neuron-backpropagation} and can now predict on any given $x$. Pretty cool, huh? The concepts were sitting there all the time. Take a moment to re-read the definitions and let's jump to the second simplest model: a two-neuron network.
+
+
+\chapter{Two-neuron ML}
+
+
+Let us now concatenate two neurons.
+
+
+\backmatter
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
