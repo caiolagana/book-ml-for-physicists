@@ -85,6 +85,4 @@ let's jump to the second simplest model: a two-neuron network.
 
 ## Chapter 2 — Two-neuron ML
 
-Let us now concatenate two neurons.
 
-*(in progress)*

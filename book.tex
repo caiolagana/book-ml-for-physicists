@@ -102,8 +102,13 @@ So, you're a physicist looking to dive into the world of machine learning. You h
 
 \mainmatter
 
-\chapter{Single-neuron ML}
-\label{chap:single-neuron}
+\chapter{Few-neuron networks}
+\label{chap:fundamentals}
+
+Toy-models are useless for real-world applications, but are wonderful for didactic purposes. In this chapter, I use few-neuron models to present {\it the} fundamental concepts for any advanced topic in ML theory.
+
+\section{Single-neuron ML}
+\label{sec:single-neuron}
 
 You have been using a single-neuron network since the first time you fitted experimental data, but perhaps no one ever told you that. Let's recall the basics. You have a set of $N$ experimental data points
 \begin{equation}
@@ -143,12 +148,12 @@ Solving \eqref{eq:single-neuron-backpropagation} for $a$ and $b$, which, in this
 and we end up with a model $f_0(x) = a_0x+b_0$ (in \eqref{eq:a0b0}, $\bar x$ and $\bar y$ are the mean values of the $x_i$ and $y_i$ datapoints). This model is a single neuron, no hidden layers: it receives one input parameter and outputs a number. $f_0$ has learned from data \eqref{eq:xy-dataset} through \eqref{eq:single-neuron-backpropagation} and can now predict on any given $x$. Pretty cool, huh? The concepts were sitting there all the time. Take a moment to re-read the definitions and let's jump to the second simplest model: a two-neuron network.
 
 
-\chapter{Two-neuron ML}
+\section{Two-neuron ML}
+\label{sec:two-neuron}
 
+Our neuron from Sec. \ref{sec:single-neuron} was of the form $f(x)=ax+b$ (always think of it as receiving one value $x$ and, upon training for $a,b$ parameters, outputting another value $a_0x+b_0$). Let us now place a second neuron, $g$, before it, so that $g$ receives the input and $f$ produces the final output. This new neuron will be of the form $g(x) = \sigma(cx+d)$, where $\sigma(x)=1/(1+e^{-x})$. The need for $\sigma$ will be elucidated later; for now, just accept it as a magical ingredient. In fact, it is the so called neuron's activation function!
 
-Our neuron from Chap. \ref{chap:single-neuron} was of the form $f(x)=ax+b$ (always think of it as receiving one value $x$ and, upon training for $a,b$ parameters, outputting another value $a_0x+b_0$). Let us now place a second neuron, $g$, before it, so that $g$ receives the input and $f$ produces the final output. This new neuron will be of the form $g(x) = \sigma(cx+d)$, where $\sigma(x)=1/(1+e^{-x})$ is called an activation function; the need for $\sigma$ will be elucidated later; for now, just accept it.
-
-Placing one neuron before another means composing the two functions, that is, given input $x$, the network outputs $f(g(x))$. In other words, input $x$ feeds a (hidden) layer $g$, which applies its weight $c$ and bias $d$, activates through $\sigma$ and feeds output layer $f$, which in turn applies weight $a$ and bias $b$ and outputs $y$. Layer $f$ has identity operator $\mathds{1}$ as its activation function. A visual diagram may help.
+Placing one neuron before another means composing the two functions, that is, given input $x$, the network outputs $f(g(x))$. In other words, input $x$ feeds a (hidden) layer $g$, which applies its weight $c$ and bias $d$, activates through $\sigma$ and feeds output layer $f$, which in turn applies weight $a$ and bias $b$ and outputs $\hat y$. Layer $f$ has identity operator $\mathds{1}$ as its activation function. A visual diagram may help.
 
 \begin{figure}[h]
     \centering
@@ -158,7 +163,7 @@ Placing one neuron before another means composing the two functions, that is, gi
             {$cx+d$ \nodepart{two} $\sigma$};
         \node[neuron, right=of g] (f)
             {$az+b$ \nodepart{two} $\mathds{1}$};
-        \node[right=of f] (out) {$y$};
+        \node[right=of f] (out) {$\hat y$};
 
         \draw[signal] (in) -- (g);
         \draw[signal] (g) -- node[above, font=\footnotesize] {z} (f);
@@ -171,11 +176,11 @@ Placing one neuron before another means composing the two functions, that is, gi
     % carries the trainable parameters, and the activation function applied to its
     % output. Here $g$ activates with $\sigma$, while $f$ activates with the
     % identity, so that $f$ is nothing but the linear fit of
-    % \cref{chap:single-neuron}.}
+    % \cref{sec:single-neuron}.}
     \label{fig:two-neuron-network}
 \end{figure}
 
-Our task now is to optimize the network for parameters $a,b,c,d$ over training data. The loss function in this scenario reads,
+Our task now is to optimize the network for parameters $a,b,c,d$ over training data. The loss function is similar to \eqref{eq:mse-loss}, just generalized for the two-neuron case,
 \begin{equation}
     \label{eq:mse-loss4}
     L_\text{MSE}(a,b,c,d) = \frac{1}{N}\sum_{i=1}^N[y_i - f(g(x_i))]^2.
@@ -186,7 +191,7 @@ This time, however, MSE minimization, stated as
     \label{eq:two-neuron-backpropagation}
     \frac{\partial}{\partial(a,b,c,d)}L_\text{MSE}(a,b,c,d) = 0
 \end{equation}
-cannot be solved analytically as in \eqref{eq:a0b0}, and numerical methods must be used. The recipe is as follows: start at a certain initial position $(a,b,c,d)$ on the four-dimensional parameter space, then slightly change each coordinate by an amount according to\footnote{Picture this process as finding a minumum in a graph. For reference, in Chap. \ref{chap:single-neuron} the graph of the loss function was a two-dimensional paraboloid with hypersurface $(a,b,L_\text{MSE}(a,b))$ embedded in $\mathbb{R}^{3}$; in this two-neuron scenario, the graph is a four-dimensional hypersurface embedded in $\mathbb{R}^{5}$. The paraboloid has a clear, well-defined minimum; this time, there may be several local minima plus saddle points and plateaus, and which one you land in depends on the starting point.}:
+cannot be solved analytically as in \eqref{eq:a0b0}, and numerical methods must be used. The recipe is as follows: start at a certain initial position $(a,b,c,d)$ on the four-dimensional parameter space, then slightly change each coordinate by an amount according to\footnote{Picture this process as finding a minumum in a graph. For reference, in Sec. \ref{sec:single-neuron} the graph of the loss function was a two-dimensional paraboloid with hypersurface $(a,b,L_\text{MSE}(a,b))$ embedded in $\mathbb{R}^{3}$; in this two-neuron scenario, the graph is a four-dimensional hypersurface embedded in $\mathbb{R}^{5}$. The paraboloid has a clear, well-defined minimum; this time, there may be several local minima plus saddle points and plateaus, and which one you land in depends on the starting point.}:
 \begin{equation}
     \begin{split}
         \label{eq:mse4-partials}
@@ -199,19 +204,28 @@ cannot be solved analytically as in \eqref{eq:a0b0}, and numerical methods must 
 
 The term $\alpha$ is called the learning rate (haleluiya, a name you've heard before, now in a clear context!) the derivatives of $L_\text{MSE}$ in \eqref{eq:mse4-partials} points to the max uphill on the hypersurface, so the minus sign will move the initial coordinate to a new position where $L_\text{MSE}$ is lower. After repeating this procedure a couple of times, \eqref{eq:two-neuron-backpropagation} will be solved to a certain desired precision (yes, I am oversimplifying, this step is a billion-dollar industry).
 
-Let's dive a little into the algebra of this example, as it will allow us to explore some fundamental concepts. The partial derivative relative to $a$ reads
+% 2) That's (full-)batch gradient descent, also called steepest descent — "batch" because each step sums over all $N$ points. Alternatives:
+
+% Mini-batch SGD — gradient from a random subset per step. Cheaper, and the noise helps escape saddles. The practical default.
+% Momentum / Nesterov — adds inertia; literally restores the term that overdamped descent dropped.
+% Adam, RMSProp, Adagrad — per-parameter adaptive learning rates. Adam is today's standard.
+% Second-order — Newton, Gauss–Newton, Levenberg–Marquardt, L-BFGS. Worth naming LM for your audience: it's what scipy.optimize.curve_fit runs, so your reader has already used a fancier optimizer than \eqref{eq:mse4-partials} without knowing it.
+
+Let's dive a little into the algebra of this example, as it will allow us to explore one very fundamental concept: backpropagation. The partial derivatives for this case can be taken explicitly:
 \begin{equation}
+    \label{eq:chain-partials}
     \begin{split}
-        \label{eq:mse4-partials}
-        \frac{\partial L}{\partial a} &= \frac{\partial L}{\partial f}\cdot\frac{\partial f}{\partial g}\cdot\frac{\partial g}{\partial x}\cdot\frac{\partial x}{\partial a}\\
-        &=1
+        \frac{\partial L}{\partial a} &= \frac{\partial L}{\partial f}\cdot\frac{\partial f}{\partial a} = -\frac{2}{N}\sum_i\big[y_i-f(g(x_i))\big]g(x_i)\\
+        \frac{\partial L}{\partial b} &= \frac{\partial L}{\partial f}\cdot\frac{\partial f}{\partial b} = -\frac{2}{N}\sum_i\big[y_i-f(g(x_i))\big]\\
+        \frac{\partial L}{\partial c} &= \frac{\partial L}{\partial f}\cdot\frac{\partial f}{\partial g}\cdot\frac{\partial g}{\partial c} = -\frac{2a}{N}\sum_i\big[y_i-f(g(x_i))\big]\sigma'(cx_i+d)x_i\\
+        \frac{\partial L}{\partial d} &= \frac{\partial L}{\partial f}\cdot\frac{\partial f}{\partial g}\cdot\frac{\partial g}{\partial d} = -\frac{2a}{N}\sum_i\big[y_i-f(g(x_i))\big]\sigma'(cx_i+d)
     \end{split}
 \end{equation}
 
-% \bigskip
-% {\setlength{\leftskip}{2em}
-% \noindent\textbf{Exercise.} Write the system of equations derived from \eqref{eq:two-neuron-backpropagation} and check non-linear terms render it impossible a linear-algebra approach.\par}
-% \bigskip
+None of these derivatives are useful right now. I do not intend to make predictions on any fake dataset with this toy model. Yet \eqref{eq:chain-partials} are the materialization of a very important concept: backpropagation.
+
+
+% Backprop isn't a family the way optimizers are — it's essentially one algorithm (reverse-mode AD), and for neural networks the choice is forced: many parameters in, one scalar loss out. 
 
 
 
