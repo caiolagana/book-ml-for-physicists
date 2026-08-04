@@ -69,7 +69,7 @@ is possible analytically, fixes the parameters to $a_0$ and $b_0$
 $$
 \begin{aligned}
 a_0 &= \frac{\sum_i (x_i - \bar{x})(y_i - \bar{y})}{\sum_i (x_i - \bar{x})^2} \\
-b_0 &= \bar{y} - a\bar{x}
+b_0 &= \bar{y} - a_0\bar{x}
 \end{aligned}
 $$
 
