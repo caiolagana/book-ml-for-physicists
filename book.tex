@@ -86,20 +86,32 @@
 \DeclareMathOperator*{\argmin}{arg\,min}
 
 % ---------- Title ----------
-\title{\Huge Machine Learning in a Nutshell\\[0.5em]
-       \Large A Physicist's Guide to the Practical Man}
+\title{Machine Learning in a Nutshell}
 \author{Caio Laganá Fernandes}
+\date{}
 
 \begin{document}
 
 \frontmatter
-\maketitle
-\tableofcontents
 
-\chapter{Preface}
+% ----- Title + preface on a single page -----
+\thispagestyle{empty}
+
+\begin{center}
+  {\Huge\bfseries Machine Learning in a Nutshell\par}
+  \vspace{0.6em}
+  {\Large A Physicist's Guide to the Practical Man\par}
+  \vspace{1.5em}
+  {\large Caio Laganá Fernandes\par}
+\end{center}
+
+\vspace{2.5em}
+
+\section*{Preface}
 
 So, you're a physicist looking to dive into the world of machine learning. You have a deep understanding of calculus, are familiar with experimental data-fitting methods, and have mastered concepts like entropy and non-linearity---yet you have only a vague idea of how a machine learning algorithm is actually written and how it works? Then this book is for you. And the good news is: your learning curve will grow fast. I've been in your shoes. I used to view machine learning as a distant horizon, but I soon realized that the knowledge I'd gained in physics made it incredibly easy to quickly master the concepts and engineering behind the field. So, come along and be amazed.
 
+\cleardoublepage
 \mainmatter
 
 \chapter{Few-neuron networks}
