@@ -49,7 +49,7 @@ No surprises so far, right? Well, what if I tell you the above is the simplest
 possible neural network? Indeed, it is a single-neuron network, where the linear
 function $f(x) = ax + b$ is the **activation function**, the mean squared error
 $\mathrm{MSE}(a,b)$ is the **loss function**, and setting its derivative to zero
-is a very rudimentary **backpropagation** method.
+is the embryo of the **gradient descent** method.
 
 Solving the zero-derivative condition for $a$ and $b$, which in this simple case
 is possible analytically, fixes the parameters to $a_0$ and $b_0$
