@@ -266,7 +266,7 @@ Phew! Much cleaner! And in return we've gained an astonishing behaviour: instead
 
 \chapter{Multi-neuron ML}
 
-We now have all necessary ingredients to build a multi-neuron network. So, let's do it! The first step is to adapt the input layer to be able to receive, instead of a single scalar $x$, a more generic object.
+We now have all necessary ingredients to build a multi-neuron network. So, let's do it! The first step is to adapt the input layer to be able to receive, instead of a single scalar $x$, a more generic object. You may argue ``the most generic object is an $N\times M$ matrix, or a tensor of arbitrary rank!'' And you're right, as I tought I was the first time I philosophized about the subject. However... When you stop to think about it, you realize that any generic object, whether it is a matrix or a tensor, can be {\it flattened} to a vector of some dimension. This flattening process can always take place outside of the network, in a data preprocessing stage. So, as far as the network itself is concerned, the most general input object is a $N$-dimensional vector.
 
 
 
