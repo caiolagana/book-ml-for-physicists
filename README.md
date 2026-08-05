@@ -2,18 +2,6 @@
 
 *by Caio Laganá*
 
-A book for physicists who already have the mathematical intuition for machine
-learning and just need someone to connect it to the vocabulary and the code.
-
-- **Sources:** [book.tex](book.tex)
-- **Rendered PDF:** [book.pdf](book.pdf)
-
-Build it locally with:
-
-```bash
-pdflatex book.tex && pdflatex book.tex   # twice, to resolve the ToC and refs
-```
-
 ---
 
 ## Preface
