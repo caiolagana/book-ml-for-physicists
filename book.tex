@@ -98,9 +98,9 @@
 \thispagestyle{empty}
 
 \begin{center}
-  {\Huge\bfseries Machine Learning in a Nutshell\par}
+  {\Huge\bfseries Machine Learning for Physicists\par}
   \vspace{0.6em}
-  {\Large A Physicist's Guide to the Practical Man\par}
+  {\Large A Nutshell Guide to the Practical Man\par}
   \vspace{1.5em}
   {\large Caio Laganá Fernandes\par}
 \end{center}
@@ -114,13 +114,13 @@ So, you're a physicist looking to dive into the world of machine learning. You h
 \cleardoublepage
 \mainmatter
 
-\chapter{Few-neuron networks}
-\label{chap:fundamentals}
+\chapter{One-neuron ML}
+\label{chap:single-neuron}
 
-Toy models are useless for real-world applications, but are wonderful for didactic purposes. In this chapter, I use few-neuron models to present {\it the} fundamental concepts for any advanced topic in ML theory.
+%Toy models are useless for real-world applications, but are wonderful for didactic purposes. In this chapter, I use few-neuron models to present {\it the} fundamental concepts for any advanced topic in ML theory.
 
-\section{Single-neuron ML}
-\label{sec:single-neuron}
+%\section{Single-neuron ML}
+%\label{sec:single-neuron}
 
 You have been using a single-neuron network since the first time you fitted experimental data, but perhaps no one ever told you that. Let's recall the basics. You have a set of $N$ experimental data points
 \begin{equation}
@@ -147,7 +147,7 @@ tells us how distant the curve $f(x)$ is from the datapoints. Fitting $f(x)$ to 
     \frac{\partial}{\partial(a,b)}L_\text{MSE}(a,b) = 0.
 \end{equation}
 
-No surprises so far, right? Well, what if I tell you the above is the simplest possible neural network? Indeed, it is a single-neuron network, where \eqref{eq:linear-activation} is (almost!) the activation function, \eqref{eq:mse-loss} is the loss function and \eqref{eq:single-neuron-backpropagation} is the embryo of the gradient descent method.
+No surprises so far, right? Well, what if I tell you the above is the simplest possible neural network? Indeed, it is a single-neuron network, where \eqref{eq:linear-activation} are the model's weights, \eqref{eq:mse-loss} is the loss function and \eqref{eq:single-neuron-backpropagation} is the embryo of the gradient descent method.
 
 Solving \eqref{eq:single-neuron-backpropagation} for $a$ and $b$, which, in this simple case is possible analytically, fixes the parameters to $a_0$ and $b_0$
 \begin{equation}
@@ -160,10 +160,10 @@ Solving \eqref{eq:single-neuron-backpropagation} for $a$ and $b$, which, in this
 and we end up with a model $f_0(x) = a_0x+b_0$ (in \eqref{eq:a0b0}, $\bar x$ and $\bar y$ are the mean values of the $x_i$ and $y_i$ datapoints). This model is a single neuron, no hidden layers: it receives one input parameter and outputs a number. $f_0$ has learned from data \eqref{eq:xy-dataset} through \eqref{eq:single-neuron-backpropagation} and can now predict on any given $x$. Pretty cool, huh? The concepts were sitting there all the time. Take a moment to re-read the definitions and let's jump to the second simplest model: a two-neuron network.
 
 
-\section{Two-neuron ML}
-\label{sec:two-neuron}
+\chapter{Two-neuron ML}
+%\label{sec:two-neuron}
 
-Our neuron from Sec. \ref{sec:single-neuron} was of the form $f(x)=ax+b$ (always think of it as receiving one value $x$ and, upon training for $a,b$ parameters, outputting another value $a_0x+b_0$). Let us now place a second neuron, $g$, before it, so that $g$ receives the input and $f$ produces the final output. This new neuron will be of the form $g(x) = \sigma(cx+d)$, where $\sigma(x)=1/(1+e^{-x})$. The need for $\sigma$ will be elucidated later; for now, just accept it as a magical ingredient. In fact, it is the neuron's so-called activation function!
+Our neuron from Chap. \ref{chap:single-neuron} was of the form $f(x)=ax+b$ (always think of it as receiving one value $x$ and, upon training for $a,b$ parameters, outputting another value $a_0x+b_0$). Let us now place a second neuron, $g$, before it, so that $g$ receives the input and $f$ produces the final output. This new neuron will be of the form $g(x) = \sigma(cx+d)$, where $\sigma(x)=1/(1+e^{-x})$. The need for $\sigma$ will be elucidated later; for now, just accept it as a magical ingredient. In fact, it is the neuron's so-called activation function!
 
 Placing one neuron before another means composing the two functions, that is, given input $x$, the network outputs $f(g(x))$. In other words, input $x$ feeds a (hidden) layer $g$, which applies its weight $c$ and bias $d$, activates through $\sigma$ and feeds output layer $f$, which in turn applies weight $a$ and bias $b$ and outputs $\hat y$. Layer $f$ has identity operator $\mathds{1}$ as its activation function. A visual diagram may help.
 
@@ -216,13 +216,6 @@ cannot be solved analytically as in \eqref{eq:a0b0}, and numerical methods must 
 
 The term $\alpha$ is called the learning rate (hallelujah, a name you've heard before, now in a clear context!). The derivatives of $L_\text{MSE}$ in \eqref{eq:mse4-partials} point to the max uphill on the hypersurface, so the minus sign will move the initial coordinate to a new position where $L_\text{MSE}$ is lower. After repeating this procedure a couple of times, \eqref{eq:two-neuron-backpropagation} will be solved to a certain desired precision (yes, I am oversimplifying, this step is a billion-dollar industry).
 
-% 2) That's (full-)batch gradient descent, also called steepest descent — "batch" because each step sums over all $N$ points. Alternatives:
-
-% Mini-batch SGD — gradient from a random subset per step. Cheaper, and the noise helps escape saddles. The practical default.
-% Momentum / Nesterov — adds inertia; literally restores the term that overdamped descent dropped.
-% Adam, RMSProp, Adagrad — per-parameter adaptive learning rates. Adam is today's standard.
-% Second-order — Newton, Gauss–Newton, Levenberg–Marquardt, L-BFGS. Worth naming LM for your audience: it's what scipy.optimize.curve_fit runs, so your reader has already used a fancier optimizer than \eqref{eq:mse4-partials} without knowing it.
-
 The recipe just described for adjusting $(a,b,c,d)$ parameters based on the partial derivatives \eqref{eq:mse4-partials} is called {\it gradient descent}. The computation of the derivatives themselves will lead to the concept of {\it backpropagation}. Stated like this, with bare partial derivatives and almost no intuition of what is going on behind the scenes, the recipe sounds a bit barren. Let me improve it.
 
 The central idea of gradient descent and backpropagation is to tell (or, more precisely, to {\it signal}) the neurons in which direction they must adjust their parameters, and by how much, in order to minimize the final loss. Think about it: how can a hidden neuron (in our two-neuron model, $g$) possibly gather information about the loss at the very output? This is the central problem to be addressed. Let's dive a little into the algebra.
@@ -271,8 +264,19 @@ As the name suggests, the error signals will {\it signal} the neurons in which d
 Phew! Much cleaner! And in return we've gained an astonishing behaviour: instead of computing all the messy partial derivatives in \eqref{eq:chain-partials}, all we need to do in order to calibrate each neuron's parameters is to compute its respective error signal and apply elementary algebra. This shortcut is called {\it backpropagation}. The name stems from the fact that, starting at the output and going backwards, each crossed layer will render the neuron one error signal. This behaviour showed up explicitly in this two-neuron toy model, but in fact it generalizes to networks of any size. This prepares our terrain for the next chapter.
 
 
-% Backprop isn't a family the way optimizers are — it's essentially one algorithm (reverse-mode AD), and for neural networks the choice is forced: many parameters in, one scalar loss out. 
+\chapter{Multi-neuron ML}
 
+We now have all necessary ingredients to build a multi-neuron network. So, let's do it! The first step is to adapt the input layer to be able to receive, instead of a single scalar $x$, a more generic object.
+
+
+
+% \section{Review of concepts}
+
+% Neuron. A neuron is a function that receives an input, applies an affine transformation to it, followed by a non-linear activation function. The affine transformation is parametrized by weights and biases, which are the parameters that will be learned during training. There are several types of activation functions, each one suitable for different tasks, to be covered in subsequent chapters. The most common ones are the sigmoid $\sigma(x) = 1/(1 + e^{-x})$, hyperbolic tangent $\tanh(x)$, and ReLU (Rectified Linear Unit) $ReLU(x) = \max(0, x)$. A word on the necessity of non-linear activation functions, that I skipped in the previous chapter when I introduced them as a ``magical ingredient'': without non-linear activation functions, a multi-neuron network would be equivalent to a single-neuron network, as the composition of linear functions is still linear. Non-linear activation functions allow the network to learn complex, non-linear relationships in the data.
+
+% Gradient descent. The recipe for training a multi-neuron network stems from the rule ``derivative of the loss function must equal to zero''. In practice, analytical solutions are only possible for very simples systems, and numerical solutions must be adopted. The idea is to start at a certain initial position in the parameter space, then slightly change each parameter by an amount according to the negative gradient of the loss function with respect to that parameter, and repeated this process until convergence, i.e., until the loss function reaches a minimum. The learning rate $\alpha$ controls the size of the steps taken in the parameter space. A too large learning rate may cause the algorithm to overshoot the minimum, while a too small learning rate may result in slow convergence.
+
+% Backpropagation. Backpropagation is a shortcut for computing the gradients of the loss function with respect to the parameters of the network. It allows us to compute the gradients efficiently by propagating the error signals backwards through the network, from the output layer to the input layer. There are several variants of backpropagation, such as stochastic gradient descent (SGD), mini-batch SGD, Adam, RMSProp, Second-order methods, among others. Each variant has its own advantages and disadvantages, and the choice of which one to use depends on the specific problem at hand.
 
 
 
