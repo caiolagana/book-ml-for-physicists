@@ -268,6 +268,18 @@ Phew! Much cleaner! And in return we've gained an astonishing behaviour: instead
 
 We now have all necessary ingredients to build a multi-neuron network. So, let's do it! The first step is to adapt the input layer to be able to receive, instead of a single scalar $x$, a more generic object. You may argue ``the most generic object is an $N\times M$ matrix, or a tensor of arbitrary rank!'' And you're right, as I tought I was the first time I philosophized about the subject. However... When you stop to think about it, you realize that any generic object, whether it is a matrix or a tensor, can be {\it flattened} to a vector of some dimension. This flattening process can always take place outside of the network, in a data preprocessing stage. So, as far as the network itself is concerned, the most general input object is a $N$-dimensional vector.
 
+The above considerations leads us to define the architecture of the first layer as a N-neuron input layer. The next step is to choose which activation function these neurons will use. We have a few options:
+
+\begin{itemize}
+    \item ReLU
+    \item Leaky ReLU
+    \item PReLU
+    \item ELU
+    \item GELU
+    \item Sigmoid/Logistic
+    \item Tanh
+\end{itemize}
+
 
 
 % \section{Review of concepts}
