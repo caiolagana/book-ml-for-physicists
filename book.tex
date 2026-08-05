@@ -86,9 +86,9 @@
 \DeclareMathOperator*{\argmin}{arg\,min}
 
 % ---------- Title ----------
-\title{\Huge Machine Learning for Physicists}
-\author{Caio Lagana}
-\date{\today}
+\title{\Huge Machine Learning in a Nutshell\\[0.5em]
+       \Large A Physicist's Guide to the Practical Man}
+\author{Caio Laganá Fernandes}
 
 \begin{document}
 
@@ -198,7 +198,7 @@ cannot be solved analytically as in \eqref{eq:a0b0}, and numerical methods must 
         a&\to a-\alpha\frac{\partial L_\text{MSE}}{\partial a}\\
         b&\to b-\alpha\frac{\partial L_\text{MSE}}{\partial b}\\
         c&\to c-\alpha\frac{\partial L_\text{MSE}}{\partial c}\\
-        d&\to d-\alpha\frac{\partial L_\text{MSE}}{\partial d}
+        d&\to d-\alpha\frac{\partial L_\text{MSE}}{\partial d}\\
     \end{split}
 \end{equation}
 
@@ -211,7 +211,11 @@ The term $\alpha$ is called the learning rate (haleluiya, a name you've heard be
 % Adam, RMSProp, Adagrad — per-parameter adaptive learning rates. Adam is today's standard.
 % Second-order — Newton, Gauss–Newton, Levenberg–Marquardt, L-BFGS. Worth naming LM for your audience: it's what scipy.optimize.curve_fit runs, so your reader has already used a fancier optimizer than \eqref{eq:mse4-partials} without knowing it.
 
-Let's dive a little into the algebra of this example, as it will allow us to explore one very fundamental concept: backpropagation. The partial derivatives for this case can be taken explicitly:
+The recipe just described for adjusting $(a,b,c,d)$ parameters based on the partial derivatives \eqref{eq:mse4-partials} is called {\it backpropagation}. Stated like, with bare partial derivatives and almost no intuition of what is going on behind the scenes, makes the recipe sound a bit barren. Let me improve it.
+
+The central idea of backpropagation is to tell (or, more precisely, to {\it signal}) the neurons which direction they must adjust its parameters in order to minimize the final loss. Think about it: how does a hidden neuron (in our two-neuron model, it is $g$) can possibly gather information about the loss at the very output? This is the problem backpropagation adresses. Let's dive a little into the algebra.
+
+The partial derivatives present in \eqref{eq:mse4-partials}, obtained through chain-rule derivatives on \eqref{eq:mse-loss4}, can, in this case, be taken explicitly:
 \begin{equation}
     \label{eq:chain-partials}
     \begin{split}
@@ -222,7 +226,37 @@ Let's dive a little into the algebra of this example, as it will allow us to exp
     \end{split}
 \end{equation}
 
-None of these derivatives are useful right now. I do not intend to make predictions on any fake dataset with this toy model. Yet \eqref{eq:chain-partials} are the materialization of a very important concept: backpropagation.
+A suitable change of variables will be of great algebraic assistance (we know from other branches of physics (electromagnetism, condensed matter, particle physics, etc) that a ``suitable change of variables'' often carries deep phenomenological significance. So, hold on!):
+\begin{equation}
+    \label{eq:new-variables}
+    \begin{split}
+        u_i = cx_i+d &\qquad\text{hidden pre-activation} \\
+        z_i = \sigma(u_i) &\qquad\text{hidden activation} \\
+        \hat y_i = f(g(x_i)) &\qquad\text{network output} 
+    \end{split}
+\end{equation}
+
+In terms of \eqref{eq:new-variables}, define the {\it error signal} as
+\begin{equation}
+    \delta_i=\frac{\partial L}{\partial\hat y_i} = -\frac{2}{N}(y_i-\hat y_i).
+\end{equation}
+and the {\it hidden error signal} as
+\begin{equation}
+    \delta^h_i=\delta_i a \sigma'(z_i).
+\end{equation}
+
+As the name suggest, the error signals will {\it signal} the neurons which direction to change their parameters, and by how much. With all this new variables, the partials \eqref{eq:chain-partials} reads
+\begin{equation}
+    \label{eq:new-chain-partials}
+    \begin{split}
+        \frac{\partial L}{\partial a} &= \sum_i\delta_i z_i\\
+        \frac{\partial L}{\partial b} &= \sum_i\delta_i\\
+        \frac{\partial L}{\partial c} &= \sum_i\delta^h_i x_i\\
+        \frac{\partial L}{\partial d} &= \sum_i\delta^h_i
+    \end{split}
+\end{equation}
+
+Phew! Much cleaner! And in return we've gained an astonishing behaviour: instead of computing all the messy partial derivatives in \eqref{eq:chain-partials}, all we need to do in order to calibrate each neuron's parameter is to compute their respective error signal and apply elementary algebra. The word backpropagation comes from the fact that, starting at the output and going backwards, each crossed layer will render the neuron one error signal. This behaviour showed up explicitly in this two-neuron toy model, but if fact it is a generalization for networks of any size. This prepares the terrain for the next chapter.
 
 
 % Backprop isn't a family the way optimizers are — it's essentially one algorithm (reverse-mode AD), and for neural networks the choice is forced: many parameters in, one scalar loss out. 
