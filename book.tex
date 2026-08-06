@@ -238,7 +238,7 @@ A suitable reparametrization of variables will be of great algebraic assistance.
         x_i &\qquad\text{input} \\
         u_i = cx_i+d &\qquad\text{hidden pre-activation} \\
         z_i = \sigma(u_i) &\qquad\text{hidden activation} \\
-        \hat y_i = f(g(x_i)) &\qquad\text{network output} 
+        \hat y_i = f(g(x_i)) = az_i+b &\qquad\text{network output} 
     \end{split}
 \end{equation}
 
@@ -262,7 +262,9 @@ As the name suggests, the error signals will {\it signal} the neurons in which d
     \end{split}
 \end{equation}
 
-Phew! Much cleaner! And in return we've gained an astonishing behaviour: instead of computing all the messy partial derivatives in \eqref{eq:chain-partials}, all we need to do in order to calibrate each neuron's parameters is to compute its respective error signal and apply elementary algebra. This shortcut is called {\it backpropagation}. The name stems from the fact that, starting at the output and going backwards, each crossed layer will render the neuron one error signal. This behaviour showed up explicitly in this two-neuron toy model, but in fact it generalizes to networks of any size. This prepares our terrain for the next chapter.
+Phew! Much cleaner than \eqref{eq:chain-partials}! And in return we've gained an astonishing behaviour: instead of computing all the messy partial derivatives in \eqref{eq:chain-partials}, all we need to do in order to calibrate each neuron's parameters is to compute its respective error signal and apply elementary algebra. This shortcut is called {\it backpropagation}. The name stems from the fact that, starting at the output and going backwards, each crossed layer will render the neuron one error signal. Look carefully: $a$ and $b$ each gained a $\delta_i$ plus $z_i$ for $a$; similarly, $c$ and $b$ each gained a $\delta^h_i$ plus $x_i$ for $c$. Were there a third layer, the recipe would repeat.
+
+This behaviour showed up explicitly in this two-neuron toy model, but in fact it generalizes to networks of any size. This prepares our terrain for the next chapter.
 
 
 \chapter{Multi-neuron ML}
