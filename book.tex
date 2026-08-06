@@ -269,13 +269,13 @@ This behaviour showed up explicitly in this two-neuron toy model, but in fact it
 
 \chapter{Multi-neuron ML}
 
-We now have all necessary ingredients to build a multi-neuron network. So, let's do it! The first step is to adapt the input layer to be able to receive, instead of a single scalar $x$, a more generic object. You may argue ``the most generic object is an $N\times M$ matrix, or a tensor of arbitrary rank!'' And you're right, as I thought I was the first time I philosophized about the subject. However... When you stop to think about it, you realize that any generic object, whether it is a matrix or a tensor, can be {\it flattened} to a vector of some dimension. This flattening process can always take place outside of the network, in a data preprocessing stage. So, as far as the network itself is concerned, the most general input object is a $N$-dimensional vector.
+We now have all necessary ingredients to build a multi-neuron network. So, let's do it! The first step is to adapt the input layer to be able to receive, instead of a single scalar $x$, a more generic object\footnote{I will drop the $i$ index in $x_i$. Remember: $i$ refered to the sample index; we will assume...}. You may argue ``the most generic object is an $N\times M$ matrix, or a tensor of arbitrary rank!'' And you're right, as I thought I was the first time I philosophized about the subject. However... When you stop to think about it, you realize that any generic object, whether it is a matrix or a tensor, can be {\it flattened} to a vector of some dimension. This flattening process can always take place outside of the network, in a data preprocessing stage. So, as far as the network itself is concerned, the most general input object is a $N$-dimensional vector.
 
 The above considerations lead us to define the architecture of the first layer as an $N$-neuron input layer. In the terminology of \eqref{eq:new-variables}, this means calling the input $\vec x_i$. The hidden pre-activation step reads
 
 \begin{equation}
     \label{eq:hidden-pre-activation-matrix}
-    \vec u_i = W\vec x_i + \vec b
+    u^i_\nu = W_{\nu\mu} x^i_\mu + b_\nu
 \end{equation}
 where $W$ is an $M\times N$ matrix, with $M$ the desired dimension of the hidden layer.
 
