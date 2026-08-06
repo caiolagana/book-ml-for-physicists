@@ -269,19 +269,32 @@ This behaviour showed up explicitly in this two-neuron toy model, but in fact it
 
 \chapter{Multi-neuron ML}
 
-We now have all necessary ingredients to build a multi-neuron network. So, let's do it! The first step is to adapt the input layer to be able to receive, instead of a single scalar $x$, a more generic object\footnote{I will drop the $i$ index in $x_i$. Remember: $i$ refered to the sample index; we will assume...}. You may argue ``the most generic object is an $N\times M$ matrix, or a tensor of arbitrary rank!'' And you're right, as I thought I was the first time I philosophized about the subject. However... When you stop to think about it, you realize that any generic object, whether it is a matrix or a tensor, can be {\it flattened} to a vector of some dimension. This flattening process can always take place outside of the network, in a data preprocessing stage. So, as far as the network itself is concerned, the most general input object is a $N$-dimensional vector.
+We now have all necessary ingredients to build a multi-neuron network. So, let's do it! The first step is to adapt the input layer to be able to receive, instead of a single scalar $x$, a more generic object. You may argue ``the most generic object is an $N\times M$ matrix, or a tensor of arbitrary rank!'' And you're right, as I thought I was the first time I philosophized about the subject. However... When you stop to think about it, you realize that any generic object, whether it is a matrix or a tensor, can be {\it flattened} to a vector of some dimension. This flattening process can always take place outside of the network, in a data preprocessing stage. So, as far as the network itself is concerned, the most general input object is a $N$-dimensional vector.
 
-The above considerations lead us to define the architecture of the first layer as an $N$-neuron input layer. In the terminology of \eqref{eq:new-variables}, this means calling the input $\vec x_i$. The hidden pre-activation step reads
+The above considerations lead us to define the architecture of the first layer as an $N$-neuron input layer. I will make use of tensor index notation (as in General Relativity books) to write the input parameter of \eqref{eq:new-variables} as
+\begin{equation}
+    x^i_\mu \qquad\text{input}
+\end{equation}
 
+I have promoted the $i$-index to the top (remember, this is the index labeling the $i$th data sample) while using greek letters at the bottom as the vector indexes. With this notation, the hidden pre-activation step reads
 \begin{equation}
     \label{eq:hidden-pre-activation-matrix}
-    u^i_\nu = W_{\nu\mu} x^i_\mu + b_\nu
+    u^i_\mu = w_{\mu\nu} x^i_\nu + b_\mu\qquad\text{hidden pre-activation}
 \end{equation}
-where $W$ is an $M\times N$ matrix, with $M$ the desired dimension of the hidden layer.
 
+In \eqref{eq:hidden-pre-activation-matrix}, the weight $c$ from \eqref{eq:new-variables} has turned into the $w_{\mu\nu}$ matrix (the letter $w$ is the standard one for referring to the $w$eights; I've been using $a$, $b$, $c$ and $d$ for lazyness) whereas the bias parameter, called $d$ in \eqref{eq:new-variables}, has turned into a bias vector $b_\mu$. Very important: the $\nu$-index range from 1 to the dimension of the input vector; the $\mu$ index range from 1 to the size of the hidden layer. The $w_{\mu\nu}$ matrix connects every input scalar to every neuron in the hidden layer.
 
-Now we choose which activation function the neurons in the hidden layer will use. We have a few options, listed in Appendix A. I will adopt ReLU.
+One last step to notice before we conclude the architecture of the input and hidden layers: the activation function for the neurons in the hidden layer must be choosen.
+\begin{equation}
+    z^i_\mu = \sigma(u^i_\mu)\qquad\text{hidden activation}
+\end{equation}
+There are a few options for $\sigma$ in the market, all listed in Appendix A. The standard choice for hidden layers is ReLU, though it may change from problem to problem.
 
+That said, we can move on to the final step,: defining the output layer. This is where the nature of the problem comes into play.
+
+\begin{equation}
+    y^i_\eta = w_{\eta\mu} z^i_\mu + b_\eta\qquad\text{network output}
+\end{equation}
 
 \chapter{Appendix A}
 
