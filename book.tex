@@ -161,7 +161,7 @@ and we end up with a model $f_0(x) = a_0x+b_0$ (in \eqref{eq:a0b0}, $\bar x$ and
 
 
 \chapter{Two-neuron ML}
-%\label{sec:two-neuron}
+\label{chap:two-neuron}
 
 Our neuron from Chap. \ref{chap:single-neuron} was of the form $f(x)=ax+b$ (always think of it as receiving one value $x$ and, upon training for $a,b$ parameters, outputting another value $a_0x+b_0$). Let us now place a second neuron, $g$, before it, so that $g$ receives the input and $f$ produces the final output. This new neuron will be of the form $g(x) = \sigma(cx+d)$, where $\sigma(x)=1/(1+e^{-x})$. The need for $\sigma$ will be elucidated later; for now, just accept it as a magical ingredient. In fact, it is the neuron's so-called activation function!
 
@@ -235,6 +235,7 @@ A suitable reparametrization of variables will be of great algebraic assistance.
 \begin{equation}
     \label{eq:new-variables}
     \begin{split}
+        x_i &\qquad\text{input} \\
         u_i = cx_i+d &\qquad\text{hidden pre-activation} \\
         z_i = \sigma(u_i) &\qquad\text{hidden activation} \\
         \hat y_i = f(g(x_i)) &\qquad\text{network output} 
@@ -266,18 +267,44 @@ Phew! Much cleaner! And in return we've gained an astonishing behaviour: instead
 
 \chapter{Multi-neuron ML}
 
-We now have all necessary ingredients to build a multi-neuron network. So, let's do it! The first step is to adapt the input layer to be able to receive, instead of a single scalar $x$, a more generic object. You may argue ``the most generic object is an $N\times M$ matrix, or a tensor of arbitrary rank!'' And you're right, as I tought I was the first time I philosophized about the subject. However... When you stop to think about it, you realize that any generic object, whether it is a matrix or a tensor, can be {\it flattened} to a vector of some dimension. This flattening process can always take place outside of the network, in a data preprocessing stage. So, as far as the network itself is concerned, the most general input object is a $N$-dimensional vector.
+We now have all necessary ingredients to build a multi-neuron network. So, let's do it! The first step is to adapt the input layer to be able to receive, instead of a single scalar $x$, a more generic object. You may argue ``the most generic object is an $N\times M$ matrix, or a tensor of arbitrary rank!'' And you're right, as I thought I was the first time I philosophized about the subject. However... When you stop to think about it, you realize that any generic object, whether it is a matrix or a tensor, can be {\it flattened} to a vector of some dimension. This flattening process can always take place outside of the network, in a data preprocessing stage. So, as far as the network itself is concerned, the most general input object is a $N$-dimensional vector.
 
-The above considerations leads us to define the architecture of the first layer as a N-neuron input layer. The next step is to choose which activation function these neurons will use. We have a few options:
+The above considerations lead us to define the architecture of the first layer as an $N$-neuron input layer. In the terminology of \eqref{eq:new-variables}, this means calling the input $\vec x_i$. The hidden pre-activation step reads
+
+\begin{equation}
+    \label{eq:hidden-pre-activation-matrix}
+    \vec u_i = W\vec x_i + \vec b
+\end{equation}
+where $W$ is an $M\times N$ matrix, with $M$ the desired dimension of the hidden layer.
+
+
+Now we choose which activation function the neurons in the hidden layer will use. We have a few options, listed in Appendix A. I will adopt ReLU.
+
+
+\chapter{Appendix A}
 
 \begin{itemize}
-    \item ReLU
-    \item Leaky ReLU
-    \item PReLU
-    \item ELU
-    \item GELU
-    \item Sigmoid/Logistic
-    \item Tanh
+    \item {\it ReLU} (Rectified Linear Unit), $\mathrm{ReLU}(x)=\max(0,x)$ --- the default choice: trivially cheap to evaluate and it never saturates for $x>0$, so the error signal survives many layers.
+
+    \item {\it Leaky ReLU}, $\mathrm{LReLU}(x)=\max(\gamma x, x)$ with a small fixed $\gamma$ (typically $0.01$) --- cures the ``dead neuron'' pathology of ReLU, whose derivative vanishes identically for negative inputs.
+
+    \item {\it PReLU} (Parametric ReLU), same form as Leaky ReLU but with $\gamma$ promoted to a trainable parameter --- lets the network learn how leaky it wants to be, at the cost of one extra parameter per neuron (or per layer).
+
+    \item {\it ELU} (Exponential Linear Unit),
+    \begin{equation*}
+        \mathrm{ELU}(x)=
+        \begin{cases}
+            x, & x>0\\
+            \beta\,(e^{x}-1), & x\leq 0
+        \end{cases}
+    \end{equation*}
+    --- smooth everywhere and saturating at $-\beta$ for large negative inputs, which pulls the mean activation toward zero and speeds up convergence.
+
+    \item {\it GELU} (Gaussian Error Linear Unit), $\mathrm{GELU}(x)=x\,\Phi(x)=\frac{x}{2}\left[1+\mathrm{erf}\!\left(x/\sqrt{2}\right)\right]$, with $\Phi$ the standard normal cumulative distribution --- a smooth, probabilistically motivated gate that weights each input by how likely it is to be positive; the standard in modern transformer architectures.
+
+    \item {\it Sigmoid/Logistic}, $\sigma(x)=1/(1+e^{-x})$ --- our old friend from \cref{chap:two-neuron}, squashing the real line into $(0,1)$; ideal for probabilities at the output, but its derivative never exceeds $1/4$, which starves deep networks of gradient.
+
+    \item {\it Tanh}, $\tanh(x)=(e^{x}-e^{-x})/(e^{x}+e^{-x})$ --- a rescaled sigmoid mapping onto $(-1,1)$, preferable to it because it is centred at zero, though it saturates just as badly.
 \end{itemize}
 
 
