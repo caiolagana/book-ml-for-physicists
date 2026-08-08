@@ -109,7 +109,7 @@
 
 \section*{Preface}
 
-So, you're a physicist looking to dive into the world of machine learning. You have a deep understanding of calculus, are familiar with experimental data-fitting methods, and have mastered concepts like entropy and non-linearity---yet you have only a vague idea of how a machine learning algorithm is actually written and how it works? Then this book is for you. And the good news is: your learning curve will grow fast. I've been in your shoes. I used to view machine learning as a distant horizon, but I soon realized that the knowledge I'd gained in physics made it incredibly easy to quickly master the concepts and engineering behind the field. So, come along and be amazed.
+So, you're a physicist looking to dive into the world of machine learning. You have a deep understanding of calculus, are familiar with experimental data-fitting methods, and have mastered concepts like entropy, non-linearity and hypersurface---yet you have only a vague idea of how a machine learning algorithm is actually written and how it works? Then this book is for you. And the good news is: your learning curve will grow fast. I've been in your shoes. I used to view machine learning as a distant horizon, but I soon realized that the knowledge I'd gained in physics made it incredibly easy to quickly master the concepts and engineering behind the field. So, come along and be amazed.
 
 \cleardoublepage
 \mainmatter
@@ -203,7 +203,7 @@ This time, however, MSE minimization, stated as
     \label{eq:two-neuron-backpropagation}
     \frac{\partial}{\partial(a,b,c,d)}L_\text{MSE}(a,b,c,d) = 0
 \end{equation}
-cannot be solved analytically as in \eqref{eq:a0b0}, and numerical methods must be used. The recipe is as follows: start at a certain initial position $(a,b,c,d)$ in the four-dimensional parameter space, then slightly change each coordinate by an amount according to\footnote{Picture this process as finding a minimum on a graph. For reference, in Sec. \ref{sec:single-neuron} the graph of the loss function, $(a,b,L_\text{MSE}(a,b))$, was a two-dimensional paraboloid embedded in $\mathbb{R}^{3}$; in this two-neuron scenario, the graph is a four-dimensional hypersurface embedded in $\mathbb{R}^{5}$. The paraboloid has a clear, well-defined minimum; this time, there may be several local minima plus saddle points and plateaus, and which one you land in depends on the starting point.}:
+cannot be solved analytically as in \eqref{eq:a0b0}, and numerical methods must be used. The recipe is as follows: start at a certain initial position $(a,b,c,d)$ in the four-dimensional parameter space, then slightly change each coordinate by an amount according to\footnote{Picture this process as finding a minimum on a graph. For reference, in Chap. \ref{chap:single-neuron} the graph of the loss function $(a,b,L_\text{MSE}(a,b))$ was a two-dimensional paraboloid embedded in $\mathbb{R}^{3}$; in this two-neuron scenario, the graph is a four-dimensional hypersurface embedded in $\mathbb{R}^{5}$. The paraboloid has a clear, well-defined minimum; this time, there may be several local minima plus saddle points and plateaus, and which one you land in depends on the starting point.}:
 \begin{equation}
     \begin{split}
         \label{eq:mse4-partials}
@@ -214,11 +214,11 @@ cannot be solved analytically as in \eqref{eq:a0b0}, and numerical methods must 
     \end{split}
 \end{equation}
 
-The term $\alpha$ is called the learning rate (hallelujah, a name you've heard before, now in a clear context!). The derivatives of $L_\text{MSE}$ in \eqref{eq:mse4-partials} point to the max uphill on the hypersurface, so the minus sign will move the initial coordinate to a new position where $L_\text{MSE}$ is lower. After repeating this procedure a couple of times, \eqref{eq:two-neuron-backpropagation} will be solved to a certain desired precision (yes, I am oversimplifying, this step is a billion-dollar industry).
+The term $\alpha$ is called the learning rate (hallelujah, a name you've heard before, now in a clear context!). The derivatives of $L_\text{MSE}$ in \eqref{eq:mse4-partials} point to the max uphill on the hypersurface, so the minus sign will move the initial coordinate to a new position where $L_\text{MSE}$ is lower. After repeating this procedure a couple of times, \eqref{eq:two-neuron-backpropagation} will be solved to a certain desired precision (yes, I am oversimplifying: this step is a billion-dollar industry).
 
 The recipe just described for adjusting $(a,b,c,d)$ parameters based on the partial derivatives \eqref{eq:mse4-partials} is called {\it gradient descent}. The computation of the derivatives themselves will lead to the concept of {\it backpropagation}. Stated like this, with bare partial derivatives and almost no intuition of what is going on behind the scenes, the recipe sounds a bit barren. Let me improve it.
 
-The central idea of gradient descent and backpropagation is to tell (or, more precisely, to {\it signal}) the neurons in which direction they must adjust their parameters, and by how much, in order to minimize the final loss. Think about it: how can a hidden neuron (in our two-neuron model, $g$) possibly gather information about the loss at the very output? This is the central problem to be addressed. Let's dive a little into the algebra.
+The central idea of gradient descent and backpropagation is to tell (or, more precisely, to {\it signal}) the neurons in which direction they must adjust their parameters, and by how much, in order to minimize the final loss. Think about it: how can a hidden neuron (in our two-neuron model, this is $g$) possibly gather information about the loss at the very output? This is the central problem to be addressed. Let's dive a little into the algebra.
 
 The partial derivatives present in \eqref{eq:mse4-partials}, obtained through chain-rule derivatives on \eqref{eq:mse-loss4}, can, in this case, be taken explicitly:
 \begin{equation}
@@ -264,37 +264,148 @@ As the name suggests, the error signals will {\it signal} the neurons in which d
 
 Phew! Much cleaner than \eqref{eq:chain-partials}! And in return we've gained an astonishing behaviour: instead of computing all the messy partial derivatives in \eqref{eq:chain-partials}, all we need to do in order to calibrate each neuron's parameters is to compute its respective error signal and apply elementary algebra. This shortcut is called {\it backpropagation}. The name stems from the fact that, starting at the output and going backwards, each crossed layer will render the neuron one error signal. Look carefully: $a$ and $b$ each gained a $\delta_i$ plus $z_i$ for $a$; similarly, $c$ and $b$ each gained a $\delta^h_i$ plus $x_i$ for $c$. Were there a third layer, the recipe would repeat.
 
-This behaviour showed up explicitly in this two-neuron toy model, but in fact it generalizes to networks of any size. This prepares our terrain for the next chapter.
+This behaviour, showed up explicitly in this two-neuron toy model, is in fact a general rule to networks of any size. This prepares our terrain for the next chapter.
 
 
 \chapter{Multi-neuron ML}
 
-We now have all necessary ingredients to build a multi-neuron network. So, let's do it! The first step is to adapt the input layer to be able to receive, instead of a single scalar $x$, a more generic object. You may argue ``the most generic object is an $N\times M$ matrix, or a tensor of arbitrary rank!'' And you're right, as I thought I was the first time I philosophized about the subject. However... When you stop to think about it, you realize that any generic object, whether it is a matrix or a tensor, can be {\it flattened} to a vector of some dimension. This flattening process can always take place outside of the network, in a data preprocessing stage. So, as far as the network itself is concerned, the most general input object is a $N$-dimensional vector.
+We now have all necessary ingredients to build a multi-neuron network. So, let's do it! The first step is to adapt the input layer to be able to receive, instead of a single scalar $x$, a more generic object. You may argue ``the most generic object is an $N\times M$ matrix, or a tensor of arbitrary rank!'' And you're right, as I thought I was the first time I philosophized about the subject. However... When you stop to think about it, you realize that any generic object, whether it is a matrix or a tensor, can be {\it flattened} to a vector of some dimension. This flattening process can always take place outside of the network, in a data preprocessing stage. So, as far as the network itself is concerned, the most general input object is an $N$-dimensional vector.
 
-The above considerations lead us to define the architecture of the first layer as an $N$-neuron input layer. I will make use of tensor index notation (as in General Relativity books) to write the input parameter of \eqref{eq:new-variables} as
+The above considerations lead us to define the architecture of the first layer as an $N$-neuron input layer. I will make use of tensor index notation to write the input parameter of \eqref{eq:new-variables} as
 \begin{equation}
-    x^i_\mu \qquad\text{input}
+    x^i_\nu \qquad\text{input}
 \end{equation}
 
-I have promoted the $i$-index to the top (remember, this is the index labeling the $i$th data sample) while using greek letters at the bottom as the vector indexes. With this notation, the hidden pre-activation step reads
+I have promoted the $i$-index to the top (remember, this is the index labeling the $i$th data point) while using greek letters at the bottom as the vector indices. With this notation, the hidden pre-activation step reads
 \begin{equation}
     \label{eq:hidden-pre-activation-matrix}
-    u^i_\mu = w_{\mu\nu} x^i_\nu + b_\mu\qquad\text{hidden pre-activation}
+    u^i_\mu = w^{(1)}_{\mu\nu} x^i_\nu + b^{(1)}_\mu\qquad\text{hidden pre-activation}
 \end{equation}
 
-In \eqref{eq:hidden-pre-activation-matrix}, the weight $c$ from \eqref{eq:new-variables} has turned into the $w_{\mu\nu}$ matrix (the letter $w$ is the standard one for referring to the $w$eights; I've been using $a$, $b$, $c$ and $d$ for lazyness) whereas the bias parameter, called $d$ in \eqref{eq:new-variables}, has turned into a bias vector $b_\mu$. Very important: the $\nu$-index range from 1 to the dimension of the input vector; the $\mu$ index range from 1 to the size of the hidden layer. The $w_{\mu\nu}$ matrix connects every input scalar to every neuron in the hidden layer.
+In \eqref{eq:hidden-pre-activation-matrix}, the weight $c$ from \eqref{eq:new-variables} has turned into the $w^{(1)}_{\mu\nu}$ matrix (the letter $w$ is the standard one for referring to the $w$eights; I've been using $a$, $b$, $c$ and $d$ out of laziness) whereas the bias parameter, called $d$ in \eqref{eq:new-variables}, has turned into a bias vector $b^{(1)}_\mu$. The $^{(1)}$ superscript indicates these are the weights and bias of the first layer; as we start composing several layers, this number will grow. One very important observation: the $\nu$-index ranges from 1 to the dimension of the input vector; the $\mu$-index ranges from 1 to the size of the hidden layer. The $w^{(1)}_{\mu\nu}$ matrix connects every input scalar to every neuron in the hidden layer.
 
-One last step to notice before we conclude the architecture of the input and hidden layers: the activation function for the neurons in the hidden layer must be choosen.
+We must now define the activation function for the neurons in the hidden layer. Following nomenclature in equation \eqref{eq:new-variables} and plugging layer index $^{(1)}$ and neuron index $\mu$, it becomes:
 \begin{equation}
-    z^i_\mu = \sigma(u^i_\mu)\qquad\text{hidden activation}
+    z^i_\mu = \sigma^{(1)}(u^i_\mu)\qquad\text{hidden activation}
 \end{equation}
-There are a few options for $\sigma$ in the market, all listed in Appendix A. The standard choice for hidden layers is ReLU, though it may change from problem to problem.
 
-That said, we can move on to the final step,: defining the output layer. This is where the nature of the problem comes into play.
-
+There are several options on the market for implementing $\sigma^{(1)}$ as an actual function, all of which are listed in Appendix A. The standard choice for hidden layers is ReLU, although this may vary from one problem to another. For now, I will leave all options open so that, in the coming chapters, we can select them and build actual models that operate on specific, concrete data. That said, we can move on to the final step: defining the output layer. Let's carry out both steps at once:
 \begin{equation}
-    y^i_\eta = w_{\eta\mu} z^i_\mu + b_\eta\qquad\text{network output}
+    \label{eq:multi-output}
+    \begin{split}
+        v^i_\eta = w^{(2)}_{\eta\mu} z^i_\mu + b^{(2)}_\eta &\qquad\text{output pre-activation}\\
+        \hat y^i_\eta = \sigma^{(2)}(v^i_\eta) &\qquad\text{network output}
+    \end{split}
 \end{equation}
+
+A few words on \eqref{eq:multi-output} are worth saying. The index $\eta$ runs over the number of neurons in the output layer. It can be one neuron with linear activation, if we are talking about a problem that must output one single unbounded number; it can be two neurons for selecting two binary, mutually exclusive classes; it can be three neurons firing simultaneously with probabilities; it can be a hundred neurons with whatever activation the problem happens to demand! Architecting the output layer is a real art that depends on the problem at hand. I will leave it open and build concrete examples in the next chapter. One last word in case this slipped under the radar: the matrix $w^{(2)}_{\eta\mu}$ belongs to the second layer and it connects every $\mu$-neuron from the previous layer to every $\eta$-neuron in the output layer; final answer $\hat y^i_\eta$ is a vector of dimension $\eta$ coming from the $i$th data input.
+
+A picture is worth more than a thousand words, isn't it?
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        unit/.style={circle, draw, thick, minimum size=4.5mm, inner sep=0pt},
+        inunit/.style={unit, fill=blue!12},
+        hidunit/.style={unit, fill=orange!18},
+        outunit/.style={unit, fill=green!14},
+        link/.style={draw=gray!40, line width=0.15pt},
+        layerlabel/.style={font=\footnotesize\bfseries, align=center},
+        paramlabel/.style={font=\footnotesize},
+        iolabel/.style={font=\small},
+    ]
+        \def\dy{0.52}   % vertical spacing between neurons
+        \def\xh{3.4}    % horizontal position of the hidden layer
+        \def\xo{6.8}    % horizontal position of the output layer
+
+        % ----- neuron positions (centred on y=0) -----
+        \foreach \k in {1,...,8}  {\coordinate (i\k) at (0,   {(4.5-\k)*\dy});}
+        \foreach \k in {1,...,12} {\coordinate (h\k) at (\xh, {(6.5-\k)*\dy});}
+        \foreach \k in {1,...,5}  {\coordinate (o\k) at (\xo, {(3-\k)*\dy});}
+
+        % ----- fully connected links (drawn first, so the neurons sit on top) -----
+        \foreach \a in {1,...,8}{\foreach \b in {1,...,12}{\draw[link] (i\a) -- (h\b);}}
+        \foreach \b in {1,...,12}{\foreach \c in {1,...,5}{\draw[link] (h\b) -- (o\c);}}
+
+        % ----- neurons -----
+        \foreach \k in {1,...,8}  {\node[inunit]  at (i\k) {};}
+        \foreach \k in {1,...,12} {\node[hidunit] at (h\k) {};}
+        \foreach \k in {1,...,5}  {\node[outunit] at (o\k) {};}
+
+        % ----- layer labels on top -----
+        \node[layerlabel] at (0,3.5)   {input layer};
+        \node[layerlabel] at (\xh,3.5) {hidden layer};
+        \node[layerlabel] at (\xo,3.5) {output layer};
+
+        % ----- which parameters live between which layers -----
+        \node[paramlabel] at ({\xh/2},-3.5)      {$w^{(1)}_{\mu\nu}$};
+        \node[paramlabel] at ({(\xh+\xo)/2},-3.5) {$w^{(2)}_{\eta\mu}$};
+
+        % ----- input and output, centred on y=0 -----
+        \node[iolabel] at (-1,0)        {$x^i_\nu$};
+        \node[iolabel] at ({\xo+1},0)   {$\hat y^i_\eta$};
+    \end{tikzpicture}
+    % \caption{A three-layer network with $\nu=1,\dots,8$ input components,
+    % $\mu=1,\dots,12$ hidden neurons and $\eta=1,\dots,5$ output neurons. Every
+    % neuron of one layer connects to every neuron of the next, so $w^{(1)}_{\mu\nu}$
+    % holds $12\times 8=96$ weights and $w^{(2)}_{\eta\mu}$ holds $5\times 12=60$,
+    % plus $12+5$ biases: $173$ trainable parameters in total.}
+    % \label{fig:multi-neuron-network}
+\end{figure}
+
+For the sake of completeness, let me write one last formula for the loss minimization condition. With all poetic license permission from mathematics, I'll write it this way:
+\begin{equation}
+    \label{eq:dLdwdb}
+    \frac{\partial}{\partial (w, b)} L = 0
+\end{equation}
+
+So much is hidden behind \eqref{eq:dLdwdb}, but since for us it is a symbolic equation, we need not worry. Modern frameworks like PyTorch, TensorFlow, scikit-learn and Keras take care of all the algebra. Just to give you an idea: a network with 8 input, 12 hidden and 5 output neurons has a total of 173 trainable $w$ and $b$ parameters, and therefore \eqref{eq:dLdwdb} leads to a system of 173 equations. Cool, huh? To be a bit more explicit, take a look at the index notation of the gradient descent equations:
+\begin{equation}
+    \label{eq:multi-gd}
+    \begin{split}
+        w^{(\ell)}_{\mu\nu} &\to w^{(\ell)}_{\mu\nu} - \alpha\,\frac{\partial L}{\partial w^{(\ell)}_{\mu\nu}}\\[2pt]
+        b^{(\ell)}_{\mu} &\to b^{(\ell)}_{\mu} - \alpha\,\frac{\partial L}{\partial b^{(\ell)}_{\mu}}
+    \end{split}
+\end{equation}
+
+All 173 updates of a hypothetical $(8,12,5)$ network are accounted for in these two lines. We could proceed by writing out the backpropagation formulas and seeing how equation \eqref{eq:new-chain-partials} generalizes elegantly using index notation. However, let's save that for a later, more theoretical chapter, as I now want to work through some concrete examples using Keras, PyTorch, TensorFlow, and scikit-learn!
+
+% Since we've come this far, it wouldn't hurt to write down backpropagation's formulae. The error signal per layer, defined as
+% \begin{equation}
+%     \label{eq:multi-delta-def}
+%     \delta^{(2)i}_\eta \equiv \frac{\partial L}{\partial v^i_\eta},
+%     \qquad
+%     \delta^{(1)i}_\mu \equiv \frac{\partial L}{\partial u^i_\mu}.
+% \end{equation}
+% The output error signal comes straight from the loss,
+% \begin{equation}
+%     \label{eq:multi-delta-out}
+%     \delta^{(2)i}_\eta = \frac{\partial L}{\partial\hat y^i_\eta}\,\sigma^{(2)\prime}(v^i_\eta)
+% \end{equation}
+% (in \cref{chap:two-neuron} the output activation was the identity, so $\sigma^{(2)\prime}=1$ and this reduced to the $\delta_i$ we defined there), and the hidden error signal follows from it by a single step backwards,
+% \begin{equation}
+%     \label{eq:multi-backprop}
+%     \delta^{(1)i}_\mu = \delta^{(2)i}_\eta\,w^{(2)}_{\eta\mu}\,\sigma^{(1)\prime}(u^i_\mu).
+% \end{equation}
+% With the error signals in hand, every derivative appearing in \eqref{eq:multi-gd} is a single product:
+% \begin{equation}
+%     \label{eq:multi-grads}
+%     \begin{split}
+%         \frac{\partial L}{\partial w^{(2)}_{\eta\mu}} = \sum_i \delta^{(2)i}_\eta\,z^i_\mu
+%         &\qquad\qquad
+%         \frac{\partial L}{\partial b^{(2)}_{\eta}} = \sum_i \delta^{(2)i}_\eta\\[2pt]
+%         \frac{\partial L}{\partial w^{(1)}_{\mu\nu}} = \sum_i \delta^{(1)i}_\mu\,x^i_\nu
+%         &\qquad\qquad
+%         \frac{\partial L}{\partial b^{(1)}_{\mu}} = \sum_i \delta^{(1)i}_\mu
+%     \end{split}
+% \end{equation}
+% Notice that the sum over $i$ is written out explicitly: the data index is a label, never implicitly contracted.
+
+% Now compare \eqref{eq:multi-grads} with what we obtained for the two-neuron toy model. It is the very same rule --- (error signal) times (input arriving at that layer) --- with scalars promoted to indexed objects. Nothing changed but the ranges of the indices. And look at \eqref{eq:multi-backprop}: to walk one layer backwards you contract the error signal with the {\it same} weight matrix used to walk forwards, summing over its first index instead of its second. In matrix language, you multiply by $w^{(2)}$ transposed. The forward pass and the backward pass use the same numbers, read in opposite directions. That is the whole of backpropagation, for a network of any size.
+
+
+
+%This is where the nature of the problem we want to solve comes into play. Suppose we have a classification problem so that, for a given input, one among five classes must be fired. Then the output layer must have 5 neurons, and the activation function to be used is Softmax (see Appendix A). If, on the other hand, two or more of the 5 classes can fire, we choose sigmoid activation. Still not appropriate to the problem at hand? Then use identity activation (that is, do nothing) to build a linear regression model, where output value is unbound. These are just a few examples of how the output layer can be designed. We will discuss each one of them (and others!) ahead. For now, let's choose 5-class softmax. This choice will also define the loss function to be used along, which for softmax is categorical cross-entropy (see Appendix B).
 
 \chapter{Appendix A}
 
