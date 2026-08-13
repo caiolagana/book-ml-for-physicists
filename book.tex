@@ -273,6 +273,7 @@ We now have all necessary ingredients to build a multi-neuron network. So, let's
 
 The above considerations lead us to define the architecture of the first layer as an $N$-neuron input layer. I will make use of tensor index notation to write the input parameter of \eqref{eq:new-variables} as
 \begin{equation}
+    \label{eq:multi-input}
     x^i_\nu \qquad\text{input}
 \end{equation}
 
@@ -406,6 +407,12 @@ All 173 updates of a hypothetical $(8,12,5)$ network are accounted for in these 
 
 
 %This is where the nature of the problem we want to solve comes into play. Suppose we have a classification problem so that, for a given input, one among five classes must be fired. Then the output layer must have 5 neurons, and the activation function to be used is Softmax (see Appendix A). If, on the other hand, two or more of the 5 classes can fire, we choose sigmoid activation. Still not appropriate to the problem at hand? Then use identity activation (that is, do nothing) to build a linear regression model, where output value is unbound. These are just a few examples of how the output layer can be designed. We will discuss each one of them (and others!) ahead. For now, let's choose 5-class softmax. This choice will also define the loss function to be used along, which for softmax is categorical cross-entropy (see Appendix B).
+
+
+\chapter{Concrete examples of NNs}
+
+Let's build the multi-layer model of equations \eqref{eq:multi-input}---\eqref{eq:multi-output}.
+
 
 \chapter{Appendix A}
 

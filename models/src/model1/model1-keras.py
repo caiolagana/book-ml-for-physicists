@@ -34,7 +34,7 @@ EPOCHS = 300
 
 # ----- data (identical to model1.py, for a fair comparison) -----
 X, y = make_classification(
-    n_samples=2000,
+    n_samples=1000,
     n_features=N_FEATURES,
     n_informative=10,
     n_classes=N_CLASSES,
@@ -45,8 +45,8 @@ X_tr, X_te, y_tr, y_te = train_test_split(
 )
 
 scaler = StandardScaler().fit(X_tr)          # statistics from the training set only
-X_tr = scaler.transform(X_tr).astype("float32")
-X_te = scaler.transform(X_te).astype("float32")
+# X_tr = scaler.transform(X_tr).astype("float32")
+# X_te = scaler.transform(X_te).astype("float32")
 
 # ----- model -----
 # The softmax is written explicitly here, mirroring eq. (network output).
