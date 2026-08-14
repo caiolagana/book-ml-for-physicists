@@ -16,8 +16,8 @@ import os
 # Must be set BEFORE importing keras, otherwise the backend is already fixed.
 os.environ["KERAS_BACKEND"] = "torch"
 
-import keras
 import numpy as np
+import keras
 from keras import layers
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
@@ -25,18 +25,18 @@ from sklearn.preprocessing import StandardScaler
 
 keras.utils.set_random_seed(0)
 
-N_FEATURES = 20   # N, the input dimension  (index nu)
-N_HIDDEN = 32     # M, the hidden layer size (index mu)
+N_FEATURES = 8   # N, the input dimension  (index nu)
+N_HIDDEN = 12     # M, the hidden layer size (index mu)
 N_CLASSES = 5     # the output dimension     (index eta)
 LR = 0.01         # the book's alpha
 BATCH = 32
-EPOCHS = 300
+EPOCHS = 400
 
 # ----- data (identical to model1.py, for a fair comparison) -----
 X, y = make_classification(
-    n_samples=1000,
+    n_samples=3000,
     n_features=N_FEATURES,
-    n_informative=10,
+    n_informative=N_FEATURES-2,
     n_classes=N_CLASSES,
     random_state=0,
 )

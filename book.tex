@@ -369,7 +369,7 @@ So much is hidden behind \eqref{eq:dLdwdb}, but since for us it is a symbolic eq
     \end{split}
 \end{equation}
 
-All 173 updates of a hypothetical $(8,12,5)$ network are accounted for in these two lines. We could proceed by writing out the backpropagation formulas and seeing how equation \eqref{eq:new-chain-partials} generalizes elegantly using index notation. However, let's save that for a later, more theoretical chapter, as I now want to work through some concrete examples using Keras, PyTorch, TensorFlow, and scikit-learn!
+All 173 updates of a hypothetical $(8,12,5)$ network are accounted for in these two lines. We could proceed by writing out the backpropagation formulas and seeing how equation \eqref{eq:new-chain-partials} generalizes elegantly using index notation. However, let's save that for a later, more theoretical chapter, as I now want to work through some concrete examples!
 
 % Since we've come this far, it wouldn't hurt to write down backpropagation's formulae. The error signal per layer, defined as
 % \begin{equation}
@@ -411,11 +411,14 @@ All 173 updates of a hypothetical $(8,12,5)$ network are accounted for in these 
 
 \chapter{Concrete examples}
 
-Let's build our first model out of equations \eqref{eq:multi-input}---\eqref{eq:multi-output}. For didactic purposes, I will use Keras to write this very first piece of code in the book.\\
+Let's build our first model out of equations \eqref{eq:multi-input}---\eqref{eq:multi-output}. For didactic purposes, I will use Keras to write this very first piece of code in the book:\\
 
 \begin{lstlisting}
-N_FEATURES = 20
-N_HIDDEN = 32
+import keras
+from keras import layers
+
+N_FEATURES = 8
+N_HIDDEN = 12
 N_CLASSES = 5
 
 model = keras.Sequential(
@@ -427,8 +430,18 @@ model = keras.Sequential(
 )
 \end{lstlisting}
 
-The above implementation precisely represents the network depicted in the figure of the preceding page: an input layer that receives vector of dimension 20, followed by a hidden layer with 32 neurons with ReLU activation, and an output layer with 5 neurons whose activation function is softmax.
+The above implementation faithfully represents the network depicted in the figure of the preceding page: an input layer that receives vectors of dimension 8, followed by a hidden layer of 12 neurons with ReLU activation, and an output layer of 5 neurons with softmax activation.
 
+The ReLU activation of the hidden layer, given by,
+\begin{equation}
+    \sigma_\text{ReLU}(x) = \max(0,x)
+\end{equation}
+is a fairly standard choice in many modern applications (it simply returns $x$ if $x>0$ and $0$ otherwise) due to its low computational cost and empirically proven efficiency. But, what about softmax activation in the output layer? Why did I choose it?
+
+Softmax activation is given by:
+\begin{equation}
+    \sigma_\text{softmax}(v_\eta) = \frac{e^{v_\eta}}{\sum_j e^{v_j}}
+\end{equation}
 
 
 
