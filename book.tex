@@ -409,9 +409,27 @@ All 173 updates of a hypothetical $(8,12,5)$ network are accounted for in these 
 %This is where the nature of the problem we want to solve comes into play. Suppose we have a classification problem so that, for a given input, one among five classes must be fired. Then the output layer must have 5 neurons, and the activation function to be used is Softmax (see Appendix A). If, on the other hand, two or more of the 5 classes can fire, we choose sigmoid activation. Still not appropriate to the problem at hand? Then use identity activation (that is, do nothing) to build a linear regression model, where output value is unbound. These are just a few examples of how the output layer can be designed. We will discuss each one of them (and others!) ahead. For now, let's choose 5-class softmax. This choice will also define the loss function to be used along, which for softmax is categorical cross-entropy (see Appendix B).
 
 
-\chapter{Concrete examples of NNs}
+\chapter{Concrete examples}
 
-Let's build the multi-layer model of equations \eqref{eq:multi-input}---\eqref{eq:multi-output}.
+Let's build our first model out of equations \eqref{eq:multi-input}---\eqref{eq:multi-output}. For didactic purposes, I will use Keras to write this very first piece of code in the book.\\
+
+\begin{lstlisting}
+N_FEATURES = 20
+N_HIDDEN = 32
+N_CLASSES = 5
+
+model = keras.Sequential(
+    [
+        keras.Input(shape=(N_FEATURES,)),
+        layers.Dense(N_HIDDEN, activation="relu"),
+        layers.Dense(N_CLASSES, activation="softmax")
+    ]
+)
+\end{lstlisting}
+
+The above implementation precisely represents the network depicted in the figure of the preceding page: an input layer that receives vector of dimension 20, followed by a hidden layer with 32 neurons with ReLU activation, and an output layer with 5 neurons whose activation function is softmax.
+
+
 
 
 \chapter{Appendix A}
