@@ -411,8 +411,9 @@ All 173 updates of a hypothetical $(8,12,5)$ network are accounted for in these 
 
 \chapter{Concrete examples}
 
-Let's build our first model out of equations \eqref{eq:multi-input}---\eqref{eq:multi-output}. For didactic purposes, I will use Keras to write this very first piece of code in the book:\\
+Let's build our first model out of equations \eqref{eq:multi-input}---\eqref{eq:multi-output}. For didactic purposes, I will use Keras to write this very first piece of code in the book:
 
+\vspace{10pt}
 \begin{lstlisting}
 import keras
 from keras import layers
@@ -429,6 +430,7 @@ model = keras.Sequential(
     ]
 )
 \end{lstlisting}
+\vspace{10pt}
 
 The above implementation faithfully represents the network depicted in the figure of the preceding page: an input layer that receives vectors of dimension 8, followed by a hidden layer of 12 neurons with ReLU activation, and an output layer of 5 neurons with softmax activation.
 
@@ -438,11 +440,25 @@ The ReLU activation of the hidden layer, given by,
 \end{equation}
 is a fairly standard choice in many modern applications (it simply returns $x$ if $x>0$ and $0$ otherwise) due to its low computational cost and empirically proven efficiency. But, what about softmax activation in the output layer? Why did I choose it?
 
-Softmax activation is given by:
+Softmax activation, given by,
 \begin{equation}
-    \sigma_\text{softmax}(v_\eta) = \frac{e^{v_\eta}}{\sum_j e^{v_j}}
+    \hat y_\eta=\sigma_\text{softmax}(v_\eta) = \frac{e^{v_\eta}}{\sum^5_{j=1} e^{v_j}}
 \end{equation}
+has one very powerful propertie: the output of all 5 neurons sums to one, that is, $\sum_{\eta=1}^5\hat y_\eta=1$. Each output value $\hat y_\eta$, therefore, can be interpreted as the probability that input $x_\nu$ belongs to class $\eta$. Observe, therefore, that the choice of softmax activation in the output layer made this network suitable for handling classification problems: given a set of features $x_\nu$, to which class $\eta$ does this data point belong?
 
+Two final ingredients are missing to complete the model: choosing the loss function and the learning rate. This can be achieved by the following piece of code:
+
+%\vspace{10pt}
+\begin{lstlisting}
+model.compile(
+    optimizer=keras.optimizers.SGD(learning_rate=0.01),
+    loss=keras.losses.SparseCategoricalCrossentropy(),
+    metrics=["accuracy"],
+)
+\end{lstlisting}
+\vspace{10pt}
+
+Take a moment to get acquainted to the nomenclature before we proceed to training of this model.
 
 
 \chapter{Appendix A}
