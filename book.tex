@@ -369,7 +369,7 @@ So much is hidden behind \eqref{eq:dLdwdb}, but since for us it is a symbolic eq
     \end{split}
 \end{equation}
 
-All 173 updates of a hypothetical $(8,12,5)$ network are accounted for in these two lines. We could proceed by writing out the backpropagation formulas and seeing how equation \eqref{eq:new-chain-partials} generalizes elegantly using index notation. However, let's save that for a later, more theoretical chapter, as I now want to work through some concrete examples!
+All 173 updates of a $(8,12,5)$ network are accounted for in these two lines. We could proceed by writing out the backpropagation formulas and seeing how equation \eqref{eq:new-chain-partials} generalizes elegantly using index notation. However, let's save that for a later chapter, as I now want to work through some concrete examples!
 
 % Since we've come this far, it wouldn't hurt to write down backpropagation's formulae. The error signal per layer, defined as
 % \begin{equation}
@@ -442,13 +442,16 @@ is a fairly standard choice in many modern applications (it simply returns $x$ i
 
 Softmax activation, given by,
 \begin{equation}
+    \label{eq:softmax5}
     \hat y_\eta=\sigma_\text{softmax}(v_\eta) = \frac{e^{v_\eta}}{\sum^5_{j=1} e^{v_j}}
 \end{equation}
-has one very powerful propertie: the output of all 5 neurons sums to one, that is, $\sum_{\eta=1}^5\hat y_\eta=1$. Each output value $\hat y_\eta$, therefore, can be interpreted as the probability that input $x_\nu$ belongs to class $\eta$. Observe, therefore, that the choice of softmax activation in the output layer made this network suitable for handling classification problems: given a set of features $x_\nu$, to which class $\eta$ does this data point belong?
+has one very powerful propertie: the output of all 5 neurons sums to one, that is, $\sum_{\eta=1}^5\hat y_\eta=1$ (observe how all output neurons are coupled to each other through the denominator of \eqref{eq:softmax5}). Each output value $\hat y_\eta$, therefore, can be interpreted as the probability that input $x_\nu$ belongs to class $\eta$. Therefore, the choice of softmax activation in the output layer made this network suitable for handling classification problems: given a set of features\footnote{The coordinates of a datapoint, that is, the information characterizing that datapoint, are called features.} $x_\nu$, the model answers ``to which class $\eta$ does this data point belong?´´
 
-Two final ingredients are missing to complete the model: choosing the loss function and the learning rate. This can be achieved by the following piece of code:
+To complete the model, all that remains is to choose the loss function and the learning rate. So far, we have used the Mean Squared Error loss function from equation \eqref{eq:mse-loss} to derive our formulas, as it was the most intuitive loss function to introduce the topic in the context of fitting experimental data points. However, when a network uses softmax activation, the MSE loss function is no longer applicable; instead, Cross-Entropy loss must be used.
 
-%\vspace{10pt}
+This can be done with the following code snippet:
+
+\vspace{10pt}
 \begin{lstlisting}
 model.compile(
     optimizer=keras.optimizers.SGD(learning_rate=0.01),
@@ -458,7 +461,7 @@ model.compile(
 \end{lstlisting}
 \vspace{10pt}
 
-Take a moment to get acquainted to the nomenclature before we proceed to training of this model.
+%Take a moment to get acquainted to the nomenclature before we proceed to training of this model.
 
 
 \chapter{Appendix A}
