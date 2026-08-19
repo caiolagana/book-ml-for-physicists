@@ -379,14 +379,16 @@ All 173 updates of a $(8,12,5)$ network are accounted for in these two lines. Wh
     \qquad
     \delta^{(1)i}_\mu \equiv \frac{\partial L}{\partial u^i_\mu}.
 \end{equation}
-leads, via the chain rule for partial derivatives and the definitions \eqref{eq:multi-input}–\eqref{eq:multi-output}, to the following general expressions:
+leads, via the chain rule for partial derivatives and the definitions \eqref{eq:multi-input}–\eqref{eq:multi-output}, to the following expressions:
 \begin{equation}
     \label{eq:multi-error-signals}
     \begin{split}
-        \delta^{(2)i}_\eta &= \frac{\partial L}{\partial\hat y^i_\eta}\,\sigma^{(2)\prime}(v^i_\eta)\\
-        \delta^{(1)i}_\mu &= \delta^{(2)i}_\eta\,w^{(2)}_{\eta\mu}\,\sigma^{(1)\prime}(u^i_\mu)
+        \delta^{(2)i}_\eta &= \frac{\partial L}{\partial\hat y^i_\kappa}\frac{\partial \hat y^i_\kappa}{\partial v^i_\eta}\\
+        \delta^{(1)i}_\mu &= \delta^{(2)i}_\eta\,w^{(2)}_{\eta\nu}\,\frac{\partial z^i_\nu}{\partial u^i_\mu}
     \end{split}
 \end{equation}
+
+I ensured that the cross-terms $\partial \hat y^i_\kappa/\partial v^i_\eta$ and $\partial z^i_\nu/\partial u^i_\mu$ were explicitly presented in Eq. \eqref{eq:multi-error-signals}. They are necessary when neurons have coupled activations—that is, when a neuron's activation function depends on the activation functions of all other neurons in the same layer. This is the case, for example, when dealing with a classification problem: only one neuron should fire with a value of $\approx 100\%$, while the others remain at $\approx 0\%$. The neurons ``communicate'' with each other precisely through these cross-terms in the error signal. If, on the other hand, the activations act one neuron at a time, the cross-terms will be zero whenever $\kappa\neq\eta$ and $\nu\neq\mu$, and only the diagonal terms will survive.
 
 The derivatives appearing in \eqref{eq:multi-gd} can then be written as:
 \begin{equation}
@@ -464,7 +466,7 @@ which has the following problematic behaviour: If the model makes a confidently 
 
 If, instead, we use Cross-Entropy loss, the logarithm perfectly cancels out the softmax derivative, leading the the well-behaved error signals:
 \begin{equation}
-    \label{eq:mse-loss-with-softmax}
+    \label{eq:ce-loss-with-softmax}
     \begin{split}
         \delta^{(2)i}_\eta &=\\[4pt]
         \delta^{(1)i}_\mu &=
