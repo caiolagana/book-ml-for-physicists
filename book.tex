@@ -363,7 +363,7 @@ For the sake of completeness, let me write one last formula for the loss minimiz
     \frac{\partial}{\partial (w, b)} L = 0
 \end{equation}
 
-So much is hidden behind \eqref{eq:dLdwdb}, but since for us it is a symbolic equation, we need not worry. Modern frameworks like PyTorch, TensorFlow, scikit-learn and Keras take care of all the algebra. Just to give you an idea: a network with 8 input, 12 hidden and 5 output neurons has a total of 173 trainable $w$ and $b$ parameters, and therefore \eqref{eq:dLdwdb} leads to a system of 173 equations. Cool, huh? To be a bit more explicit, take a look at the index notation of the gradient descent equations:
+So much is hidden behind \eqref{eq:dLdwdb}, but since for us it is a symbolic equation, we need not worry. Modern frameworks like PyTorch and TensorFlow take care of all the algebra. Just to give you an idea: a network with 8 input, 12 hidden and 5 output neurons has a total of 173 trainable $w$ and $b$ parameters, and therefore \eqref{eq:dLdwdb} leads to a system of 173 equations. Cool, huh? To be a bit more explicit, take a look at the index notation of the gradient descent equations:
 \begin{equation}
     \label{eq:multi-gd}
     \begin{split}
@@ -372,22 +372,23 @@ So much is hidden behind \eqref{eq:dLdwdb}, but since for us it is a symbolic eq
     \end{split}
 \end{equation}
 
-All 173 updates of a $(8,12,5)$ network are accounted for in these two lines. Since we've come this far, it wouldn't hurt to write down backpropagation's formulae and see how equation \eqref{eq:new-chain-partials} generalizes elegantly using index notation. The error signal per layer, defined as\footnote{In Eq. \eqref{eq:2neuron-error-signal}, $\delta_i^{(2)}$ was defined as the partial derivative of the loss with respect to the output $\hat y_i$; that was the case because the activation of the output layer was the identity $\mathds{1}$, and there was no pre-activation variable $v_i$ (or, $\hat y_i=\mathds{1}(v_i)$ if you will). However, the error signal is always defined as the partial derivative of the loss with respect to the pre-activation, like in \eqref{eq:multi-delta-def}.}
+All 173 updates of a $(8,12,5)$ network are accounted for in these two lines. What about backpropagation's formulae using index notation? The error signals per layer, defined as\footnote{In Eq. \eqref{eq:2neuron-error-signal}, $\delta_i^{(2)}$ was defined as the partial derivative of the loss with respect to the output $\hat y_i$; that was the case because the activation of the output layer was the identity $\mathds{1}$, and there was no pre-activation variable $v_i$ (or, $\hat y_i=\mathds{1}(v_i)$ if you will). However, the error signal is always defined as the partial derivative of the loss with respect to the pre-activation, like in \eqref{eq:multi-delta-def}.}
 \begin{equation}
     \label{eq:multi-delta-def}
     \delta^{(2)i}_\eta \equiv \frac{\partial L}{\partial v^i_\eta},
     \qquad
     \delta^{(1)i}_\mu \equiv \frac{\partial L}{\partial u^i_\mu}.
 \end{equation}
-leads to the following expressions for the error signals:
+leads, via the chain rule for partial derivatives and the definitions \eqref{eq:multi-input}–\eqref{eq:multi-output}, to the following general expressions:
 \begin{equation}
     \label{eq:multi-error-signals}
     \begin{split}
-        \delta^{(1)i}_\mu &= \delta^{(2)i}_\eta\,w^{(2)}_{\eta\mu}\,\sigma^{(1)\prime}(u^i_\mu)\\
-        \delta^{(2)i}_\eta &= \frac{\partial L}{\partial\hat y^i_\eta}\,\sigma^{(2)\prime}(v^i_\eta)
+        \delta^{(2)i}_\eta &= \frac{\partial L}{\partial\hat y^i_\eta}\,\sigma^{(2)\prime}(v^i_\eta)\\
+        \delta^{(1)i}_\mu &= \delta^{(2)i}_\eta\,w^{(2)}_{\eta\mu}\,\sigma^{(1)\prime}(u^i_\mu)
     \end{split}
 \end{equation}
-and the derivatives appearing in \eqref{eq:multi-gd} reads:
+
+The derivatives appearing in \eqref{eq:multi-gd} can then be written as:
 \begin{equation}
     \label{eq:multi-grads}
     \begin{split}
@@ -400,16 +401,16 @@ and the derivatives appearing in \eqref{eq:multi-gd} reads:
     \end{split}
 \end{equation}
 
-Do not bother too much with these expressions; use them as a reference whenever you decide to perform the algebraic calculations yourself. I will use Eq. \eqref{eq:multi-error-signals} for a theoretical argument in the next chapter; that is why I needed to present it explicitly. Observe, nevertheless, how \eqref{eq:multi-grads} beautifully generalizes the backpropagation formulae we obtained for the two-neuron toy model: it is the very same rule --- error signal times the input arriving at that layer. Nothing changed but the presence of the indices. That is the whole of backpropagation, for a network of any size.
+Observe how \eqref{eq:multi-grads} beautifully generalizes the backpropagation formulae we obtained for the two-neuron toy model in Eq. \eqref{eq:new-chain-partials}: it is the very same rule --- error signal times the input arriving at that layer. Nothing changed but the presence of the indices.
 
 
 
-%This is where the nature of the problem we want to solve comes into play. Suppose we have a classification problem so that, for a given input, one among five classes must be fired. Then the output layer must have 5 neurons, and the activation function to be used is Softmax (see Appendix A). If, on the other hand, two or more of the 5 classes can fire, we choose sigmoid activation. Still not appropriate to the problem at hand? Then use identity activation (that is, do nothing) to build a linear regression model, where output value is unbound. These are just a few examples of how the output layer can be designed. We will discuss each one of them (and others!) ahead. For now, let's choose 5-class softmax. This choice will also define the loss function to be used along, which for softmax is categorical cross-entropy (see Appendix B).
+With that, we have just covered the key theoretical results needed to build a truly realistic, multilayer model. So, let's get to it!
 
 
 \chapter{Concrete examples}
 
-Let's build our first model out of equations \eqref{eq:multi-input}---\eqref{eq:multi-output}. For didactic purposes, I will use Keras to write this very first piece of code in the book:
+Let's build our first model out of equations \eqref{eq:multi-input}---\eqref{eq:multi-gd}. For didactic purposes, I will use Keras to write this very first piece of code in the book:
 
 \vspace{10pt}
 \begin{lstlisting}
@@ -430,7 +431,7 @@ model = keras.Sequential(
 \end{lstlisting}
 \vspace{10pt}
 
-The above implementation faithfully represents the network depicted in the figure of the preceding page: an input layer that receives vectors of dimension 8, followed by a hidden layer of 12 neurons with ReLU activation, and an output layer of 5 neurons with softmax activation.
+The above implementation faithfully represents the network depicted in the figure of the preceding Chapter: an input layer that receives vectors of dimension 8, followed by a hidden layer of 12 neurons with ReLU activation, and an output layer of 5 neurons with softmax activation.
 
 The ReLU activation of the hidden layer, given by,
 \begin{equation}
@@ -443,22 +444,35 @@ Softmax activation, given by,
     \label{eq:softmax5}
     \hat y_\eta=\sigma_\text{softmax}(v_\eta) = \frac{e^{v_\eta}}{\sum^5_{j=1} e^{v_j}}
 \end{equation}
-has one very powerful propertie: the output of all 5 neurons sums to one, that is, $\sum_{\eta=1}^5\hat y_\eta=1$ (observe how all output neurons are coupled to each other through the denominator of \eqref{eq:softmax5}). Each output value $\hat y_\eta$, therefore, can be interpreted as the probability that input $x_\nu$ belongs to class $\eta$. Therefore, the choice of softmax activation in the output layer made this network suitable for handling classification problems: given a set of features\footnote{The coordinates of a datapoint, that is, the information characterizing that datapoint, are called features.} $x_\nu$, the model answers ``to which class $\eta$ does this data point belong?´´
+has one very powerful property: the output of all 5 neurons sums to one, that is, $\sum_{\eta=1}^5\hat y_\eta=1$ (observe how all output neurons are coupled to each other through the denominator of \eqref{eq:softmax5}). Each output value $\hat y_\eta$, therefore, can be interpreted as the probability that input $x_\nu$ belongs to class $\eta$. Therefore, the choice of softmax activation in the output layer made this network suitable for handling classification problems: given a set of features\footnote{The coordinates of a datapoint, that is, the information characterizing that datapoint, are called features.} $x_\nu$, the model answers ``to which class $\eta$ does this data point belong?´´
 
-To complete the model, all that remains is to choose the loss function and the learning rate. In the preceeding theoretical chapters, we used the Mean Squared Error loss function from equation \eqref{eq:mse-loss} to derive the backpropagation formulas, as it was the most intuitive loss function to introduce the topic in the context of fitting experimental data points. However, when a network employs softmax activation, the MSE loss function is no longer a suitable choice; instead, the Cross-Entropy loss function should be used:
+To complete the model, the loss function and the learning rate must be chosen. In the first Chapter, we used the Mean Squared Error loss function from equation \eqref{eq:mse-loss} to derive the backpropagation formulas, as it was the most intuitive loss function to introduce the topic in the context of fitting experimental data points. However, when a network employs softmax activation, the MSE loss function is no longer a suitable choice; instead, the Cross-Entropy loss function should be used:
 \begin{equation}
     \label{eq:Lce}
-    L_{\text CE} = -\sum^5_{\eta=1} y_\eta\log(\hat y_\eta)
+    L_{\text CE} = -\sum_{i=1}^N\sum^5_{\eta=1} y^i_\eta\log(\hat y^i_\eta)
 \end{equation}
 
-The reason steams from Eq. \eqref{eq:multi-error-signals}, where the term XXX in the derivative of the Cross-Entropy loss,
+Had we used MSE loss, the error signals from \eqref{eq:multi-error-signals} would read
 \begin{equation}
-    \frac{\partial L_{\text CE}}{\partial\hat y^i_\eta} = 
+    \label{eq:mse-loss-with-softmax}
+    \begin{split}
+        \delta^{(2)i}_\eta &= -\frac{2}{N}\,(y^i_\eta - \hat y^i_\eta)\,\hat y^i_\eta(1-\hat y^i_\eta)\\[4pt]
+        \delta^{(1)i}_\mu &= -\frac{2}{N}\sum_{\eta=1}^{5}(y^i_\eta - \hat y^i_\eta)\,\hat y^i_\eta(1-\hat y^i_\eta)\,w^{(2)}_{\eta\mu}\,\sigma^{(1)\prime}(u^i_\mu)
+    \end{split}
 \end{equation}
-is perfectly cancelled out by the term YYY in the derivative of the softmax activation
+which has the following problematic behaviour: If the model makes a confidently wrong prediction (e.g., target $y^i_\eta = 1$, but predicted $\hat{y}^i_\eta \approx 0$), the term $\hat{y}^i_\eta (1 - \hat{y}^i_\eta)$ approaches 0. As a result, the entire gradient vanishes, making weight updates nearly zero when the error is at its largest. The network stops learning precisely when it needs to adjust the most\footnote{This paragraph was writen by Gemini. She gave such clear explanation when I prompted, that I decided to Ctrl+C.}.
+
+If, instead, we use Cross-Entropy loss, the logarithm perfectly cancels out the softmax derivative, leading the the well-behaved error signals:
 \begin{equation}
-    \sigma'=
+    \label{eq:mse-loss-with-softmax}
+    \begin{split}
+        \delta^{(2)i}_\eta &=\\[4pt]
+        \delta^{(1)i}_\mu &=
+    \end{split}
 \end{equation}
+
+
+\newpage
 
 \begin{table}[htbp]
   \centering
