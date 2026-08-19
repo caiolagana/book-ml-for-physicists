@@ -29,6 +29,7 @@
 \usepackage{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,shapes.multipart}
+\usepackage{tabularx}
 
 % Neuron box: left half is the affine part, right half the activation
 \tikzset{
@@ -216,9 +217,9 @@ cannot be solved analytically as in \eqref{eq:a0b0}, and numerical methods must 
 
 The term $\alpha$ is called the learning rate (hallelujah, a name you've heard before, now in a clear context!). The derivatives of $L_\text{MSE}$ in \eqref{eq:mse4-partials} point to the max uphill on the hypersurface, so the minus sign will move the initial coordinate to a new position where $L_\text{MSE}$ is lower. After repeating this procedure a couple of times, \eqref{eq:two-neuron-backpropagation} will be solved to a certain desired precision (yes, I am oversimplifying: this step is a billion-dollar industry).
 
-The recipe just described for adjusting $(a,b,c,d)$ parameters based on the partial derivatives \eqref{eq:mse4-partials} is called {\it gradient descent}. The computation of the derivatives themselves will lead to the concept of {\it backpropagation}. Stated like this, with bare partial derivatives and almost no intuition of what is going on behind the scenes, the recipe sounds a bit barren. Let me improve it.
+The recipe just described for adjusting $(a,b,c,d)$ parameters based on the partial derivatives \eqref{eq:mse4-partials} is called {\it gradient descent}. The computation of the derivatives themselves will lead to the concept of {\it backpropagation}. Stated like this, with bare partial derivatives and almost no intuition of what is going on behind the scenes, the recipe sounds a bit barren. Let me try yo improve it.
 
-The central idea of gradient descent and backpropagation is to tell (or, more precisely, to {\it signal}) the neurons in which direction they must adjust their parameters, and by how much, in order to minimize the final loss. Think about it: how can a hidden neuron (in our two-neuron model, this is $g$) possibly gather information about the loss at the very output? This is the central problem to be addressed. Let's dive a little into the algebra.
+The central idea of gradient descent and backpropagation is to tell (or, more precisely, to {\it signal}) the neurons in which direction they must adjust their parameters, and by how much, in order to minimize the final loss. Think about it: how can a hidden neuron (in our two-neuron model, this is $g$) possibly gather information about the loss at the output? This is the central problem to be addressed. Let's dive a little into the algebra.
 
 The partial derivatives present in \eqref{eq:mse4-partials}, obtained through chain-rule derivatives on \eqref{eq:mse-loss4}, can, in this case, be taken explicitly:
 \begin{equation}
@@ -244,25 +245,27 @@ A suitable reparametrization of variables will be of great algebraic assistance.
 
 In terms of \eqref{eq:new-variables}, define the {\it error signal} as
 \begin{equation}
-    \delta_i=\frac{\partial L}{\partial\hat y_i} = -\frac{2}{N}(y_i-\hat y_i),
+    \label{eq:2neuron-error-signal}
+    \delta^{(2)}_i=\frac{\partial L}{\partial\hat y_i} = -\frac{2}{N}(y_i-\hat y_i),
 \end{equation}
 and the {\it hidden error signal} as
 \begin{equation}
-    \delta^h_i=\delta_i a \sigma'(u_i).
+    \label{eq:2neuron-hidden-error-signal}
+    \delta^{(1)}_i=\delta_i a \sigma'(u_i).
 \end{equation}
 
 As the name suggests, the error signals will {\it signal} the neurons in which direction to change their parameters, and by how much. With all these new variables, the partials \eqref{eq:chain-partials} read
 \begin{equation}
     \label{eq:new-chain-partials}
     \begin{split}
-        \frac{\partial L}{\partial a} &= \sum_i\delta_i z_i\\
-        \frac{\partial L}{\partial b} &= \sum_i\delta_i\\
-        \frac{\partial L}{\partial c} &= \sum_i\delta^h_i x_i\\
-        \frac{\partial L}{\partial d} &= \sum_i\delta^h_i
+        \frac{\partial L}{\partial a} &= \sum_i\delta^{(2)}_i z_i\\
+        \frac{\partial L}{\partial b} &= \sum_i\delta^{(2)}_i\\
+        \frac{\partial L}{\partial c} &= \sum_i\delta^{(1)}_i x_i\\
+        \frac{\partial L}{\partial d} &= \sum_i\delta^{(1)}_i
     \end{split}
 \end{equation}
 
-Phew! Much cleaner than \eqref{eq:chain-partials}! And in return we've gained an astonishing behaviour: instead of computing all the messy partial derivatives in \eqref{eq:chain-partials}, all we need to do in order to calibrate each neuron's parameters is to compute its respective error signal and apply elementary algebra. This shortcut is called {\it backpropagation}. The name stems from the fact that, starting at the output and going backwards, each crossed layer will render the neuron one error signal. Look carefully: $a$ and $b$ each gained a $\delta_i$ plus $z_i$ for $a$; similarly, $c$ and $b$ each gained a $\delta^h_i$ plus $x_i$ for $c$. Were there a third layer, the recipe would repeat.
+Phew! Much cleaner than \eqref{eq:chain-partials}! And in return we've gained an astonishing behaviour: instead of computing all the messy partial derivatives in \eqref{eq:chain-partials}, all we need to do in order to calibrate each neuron's parameters is to compute its respective error signal and apply elementary algebra. This shortcut is called {\it backpropagation}. The name stems from the fact that, starting at the output and going backwards, each crossed layer will render the neuron one error signal. Look carefully: $a$ and $b$ each gained a $\delta^{(2)}_i$ plus $z_i$ for $a$; similarly, $c$ and $b$ each gained a $\delta^{(1)}_i$ plus $x_i$ for $c$. Were there a third layer, the recipe would repeat.
 
 This behaviour, showed up explicitly in this two-neuron toy model, is in fact a general rule to networks of any size. This prepares our terrain for the next chapter.
 
@@ -369,40 +372,35 @@ So much is hidden behind \eqref{eq:dLdwdb}, but since for us it is a symbolic eq
     \end{split}
 \end{equation}
 
-All 173 updates of a $(8,12,5)$ network are accounted for in these two lines. We could proceed by writing out the backpropagation formulas and seeing how equation \eqref{eq:new-chain-partials} generalizes elegantly using index notation. However, let's save that for a later chapter, as I now want to work through some concrete examples!
+All 173 updates of a $(8,12,5)$ network are accounted for in these two lines. Since we've come this far, it wouldn't hurt to write down backpropagation's formulae and see how equation \eqref{eq:new-chain-partials} generalizes elegantly using index notation. The error signal per layer, defined as\footnote{In Eq. \eqref{eq:2neuron-error-signal}, $\delta_i^{(2)}$ was defined as the partial derivative of the loss with respect to the output $\hat y_i$; that was the case because the activation of the output layer was the identity $\mathds{1}$, and there was no pre-activation variable $v_i$ (or, $\hat y_i=\mathds{1}(v_i)$ if you will). However, the error signal is always defined as the partial derivative of the loss with respect to the pre-activation, like in \eqref{eq:multi-delta-def}.}
+\begin{equation}
+    \label{eq:multi-delta-def}
+    \delta^{(2)i}_\eta \equiv \frac{\partial L}{\partial v^i_\eta},
+    \qquad
+    \delta^{(1)i}_\mu \equiv \frac{\partial L}{\partial u^i_\mu}.
+\end{equation}
+leads to the following expressions for the error signals:
+\begin{equation}
+    \label{eq:multi-error-signals}
+    \begin{split}
+        \delta^{(1)i}_\mu &= \delta^{(2)i}_\eta\,w^{(2)}_{\eta\mu}\,\sigma^{(1)\prime}(u^i_\mu)\\
+        \delta^{(2)i}_\eta &= \frac{\partial L}{\partial\hat y^i_\eta}\,\sigma^{(2)\prime}(v^i_\eta)
+    \end{split}
+\end{equation}
+and the derivatives appearing in \eqref{eq:multi-gd} reads:
+\begin{equation}
+    \label{eq:multi-grads}
+    \begin{split}
+        \frac{\partial L}{\partial w^{(2)}_{\eta\mu}} = \sum_i \delta^{(2)i}_\eta\,z^i_\mu
+        &\qquad\qquad
+        \frac{\partial L}{\partial b^{(2)}_{\eta}} = \sum_i \delta^{(2)i}_\eta\\[2pt]
+        \frac{\partial L}{\partial w^{(1)}_{\mu\nu}} = \sum_i \delta^{(1)i}_\mu\,x^i_\nu
+        &\qquad\qquad
+        \frac{\partial L}{\partial b^{(1)}_{\mu}} = \sum_i \delta^{(1)i}_\mu
+    \end{split}
+\end{equation}
 
-% Since we've come this far, it wouldn't hurt to write down backpropagation's formulae. The error signal per layer, defined as
-% \begin{equation}
-%     \label{eq:multi-delta-def}
-%     \delta^{(2)i}_\eta \equiv \frac{\partial L}{\partial v^i_\eta},
-%     \qquad
-%     \delta^{(1)i}_\mu \equiv \frac{\partial L}{\partial u^i_\mu}.
-% \end{equation}
-% The output error signal comes straight from the loss,
-% \begin{equation}
-%     \label{eq:multi-delta-out}
-%     \delta^{(2)i}_\eta = \frac{\partial L}{\partial\hat y^i_\eta}\,\sigma^{(2)\prime}(v^i_\eta)
-% \end{equation}
-% (in \cref{chap:two-neuron} the output activation was the identity, so $\sigma^{(2)\prime}=1$ and this reduced to the $\delta_i$ we defined there), and the hidden error signal follows from it by a single step backwards,
-% \begin{equation}
-%     \label{eq:multi-backprop}
-%     \delta^{(1)i}_\mu = \delta^{(2)i}_\eta\,w^{(2)}_{\eta\mu}\,\sigma^{(1)\prime}(u^i_\mu).
-% \end{equation}
-% With the error signals in hand, every derivative appearing in \eqref{eq:multi-gd} is a single product:
-% \begin{equation}
-%     \label{eq:multi-grads}
-%     \begin{split}
-%         \frac{\partial L}{\partial w^{(2)}_{\eta\mu}} = \sum_i \delta^{(2)i}_\eta\,z^i_\mu
-%         &\qquad\qquad
-%         \frac{\partial L}{\partial b^{(2)}_{\eta}} = \sum_i \delta^{(2)i}_\eta\\[2pt]
-%         \frac{\partial L}{\partial w^{(1)}_{\mu\nu}} = \sum_i \delta^{(1)i}_\mu\,x^i_\nu
-%         &\qquad\qquad
-%         \frac{\partial L}{\partial b^{(1)}_{\mu}} = \sum_i \delta^{(1)i}_\mu
-%     \end{split}
-% \end{equation}
-% Notice that the sum over $i$ is written out explicitly: the data index is a label, never implicitly contracted.
-
-% Now compare \eqref{eq:multi-grads} with what we obtained for the two-neuron toy model. It is the very same rule --- (error signal) times (input arriving at that layer) --- with scalars promoted to indexed objects. Nothing changed but the ranges of the indices. And look at \eqref{eq:multi-backprop}: to walk one layer backwards you contract the error signal with the {\it same} weight matrix used to walk forwards, summing over its first index instead of its second. In matrix language, you multiply by $w^{(2)}$ transposed. The forward pass and the backward pass use the same numbers, read in opposite directions. That is the whole of backpropagation, for a network of any size.
+Do not bother too much with these expressions; use them as a reference whenever you decide to perform the algebraic calculations yourself. I will use Eq. \eqref{eq:multi-error-signals} for a theoretical argument in the next chapter; that is why I needed to present it explicitly. Observe, nevertheless, how \eqref{eq:multi-grads} beautifully generalizes the backpropagation formulae we obtained for the two-neuron toy model: it is the very same rule --- error signal times the input arriving at that layer. Nothing changed but the presence of the indices. That is the whole of backpropagation, for a network of any size.
 
 
 
@@ -447,7 +445,48 @@ Softmax activation, given by,
 \end{equation}
 has one very powerful propertie: the output of all 5 neurons sums to one, that is, $\sum_{\eta=1}^5\hat y_\eta=1$ (observe how all output neurons are coupled to each other through the denominator of \eqref{eq:softmax5}). Each output value $\hat y_\eta$, therefore, can be interpreted as the probability that input $x_\nu$ belongs to class $\eta$. Therefore, the choice of softmax activation in the output layer made this network suitable for handling classification problems: given a set of features\footnote{The coordinates of a datapoint, that is, the information characterizing that datapoint, are called features.} $x_\nu$, the model answers ``to which class $\eta$ does this data point belong?´´
 
-To complete the model, all that remains is to choose the loss function and the learning rate. So far, we have used the Mean Squared Error loss function from equation \eqref{eq:mse-loss} to derive our formulas, as it was the most intuitive loss function to introduce the topic in the context of fitting experimental data points. However, when a network uses softmax activation, the MSE loss function is no longer applicable; instead, Cross-Entropy loss must be used.
+To complete the model, all that remains is to choose the loss function and the learning rate. In the preceeding theoretical chapters, we used the Mean Squared Error loss function from equation \eqref{eq:mse-loss} to derive the backpropagation formulas, as it was the most intuitive loss function to introduce the topic in the context of fitting experimental data points. However, when a network employs softmax activation, the MSE loss function is no longer a suitable choice; instead, the Cross-Entropy loss function should be used:
+\begin{equation}
+    \label{eq:Lce}
+    L_{\text CE} = -\sum^5_{\eta=1} y_\eta\log(\hat y_\eta)
+\end{equation}
+
+The reason steams from Eq. \eqref{eq:multi-error-signals}, where the term XXX in the derivative of the Cross-Entropy loss,
+\begin{equation}
+    \frac{\partial L_{\text CE}}{\partial\hat y^i_\eta} = 
+\end{equation}
+is perfectly cancelled out by the term YYY in the derivative of the softmax activation
+\begin{equation}
+    \sigma'=
+\end{equation}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Loss Functions and Output Layer Activations by Machine Learning Task}
+  \label{tab:loss_activations}
+  \vspace{0.5em}
+  \small
+  \begin{tabularx}{\textwidth}{p{2.8cm} X p{2.2cm} p{3.2cm} p{3.2cm}}
+    \toprule
+    \textbf{Problem Type} & \textbf{Target Variable ($y$) Format} & \textbf{Output Activation} & \textbf{Primary Loss Function} & \textbf{Alternative Loss Functions} \\
+    \midrule
+    \textbf{Binary Classification} & Single value: $0$ or $1$ & Sigmoid & Binary Cross-Entropy (Log Loss) & Focal Loss, Hinge Loss (SVM) \\
+    \addlinespace
+    \textbf{Multi-Class Classification} & One-Hot Encoded Vector or Single Integer Index & Softmax & Categorical Cross-Entropy\textsuperscript{*} & Focal Loss, KL Divergence \\
+    \addlinespace
+    \textbf{Multi-Label Classification} & Binary Vector (e.g., $[1, 0, 1]$) & Sigmoid (element-wise) & Binary Cross-Entropy & Binary Focal Loss \\
+    \addlinespace
+    \textbf{Regression} & Real numbers ($y \in \mathbb{R}$) & Linear (None) & Mean Squared Error (MSE) & Mean Absolute Error (MAE), Huber Loss, Log-Cosh \\
+    \addlinespace
+    \textbf{Non-Negative Regression} & Non-negative real numbers ($y \ge 0$) & ReLU or Softplus & MSE or MAPE & Poisson Loss \\
+    \addlinespace
+    \textbf{Bounded Regression} & Range-bounded values, e.g., $[0, 1]$ & Sigmoid & MSE or MAE & Binary Cross-Entropy \\
+    \bottomrule
+  \end{tabularx}
+  \begin{flushleft}
+    \footnotesize\textsuperscript{*} Use Sparse Categorical Cross-Entropy when targets are single integer class labels.
+  \end{flushleft}
+\end{table}
 
 This can be done with the following code snippet:
 
