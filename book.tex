@@ -458,53 +458,24 @@ Had we used MSE loss, the error signals from \eqref{eq:multi-error-signals} woul
 \begin{equation}
     \label{eq:mse-loss-with-softmax}
     \begin{split}
-        \delta^{(2)i}_\eta &= -\frac{2}{N}\,(y^i_\eta - \hat y^i_\eta)\,\hat y^i_\eta(1-\hat y^i_\eta)\\[4pt]
-        \delta^{(1)i}_\mu &= -\frac{2}{N}\sum_{\eta=1}^{5}(y^i_\eta - \hat y^i_\eta)\,\hat y^i_\eta(1-\hat y^i_\eta)\,w^{(2)}_{\eta\mu}\,\sigma^{(1)\prime}(u^i_\mu)
+        \delta^{(2)i}_\eta &= -\frac{2}{N}\,\hat y^i_\eta\left[(y^i_\eta - \hat y^i_\eta) - \sum_{\kappa=1}^{5}(y^i_\kappa - \hat y^i_\kappa)\,\hat y^i_\kappa\right]\\[4pt]
+        \delta^{(1)i}_\mu &= \delta^{(2)i}_\eta\,w^{(2)}_{\eta\mu}\,\sigma^{(1)\prime}(u^i_\mu)
     \end{split}
 \end{equation}
-which has the following problematic behaviour: If the model makes a confidently wrong prediction (e.g., target $y^i_\eta = 1$, but predicted $\hat{y}^i_\eta \approx 0$), the term $\hat{y}^i_\eta (1 - \hat{y}^i_\eta)$ approaches 0. As a result, the entire gradient vanishes, making weight updates nearly zero when the error is at its largest. The network stops learning precisely when it needs to adjust the most\footnote{This paragraph was writen by Gemini. She gave such clear explanation when I prompted, that I decided to Ctrl+C.}.
+which has the following problematic behaviour: the whole error signal carries an overall factor $\hat y^i_\eta$. If the model makes a confidently wrong prediction (e.g., target $y^i_\eta = 1$, but predicted $\hat{y}^i_\eta \approx 0$), the bracket remains of order one while that prefactor collapses. As a result, the entire gradient vanishes, making weight updates nearly zero when the error is at its largest. The network stops learning precisely when it needs to adjust the most\footnote{This paragraph was writen by Gemini and adapter to index-notation by Claude. They gave such clear explanation that I decided to Ctrl+C.}.
 
-If, instead, we use Cross-Entropy loss, the logarithm perfectly cancels out the softmax derivative, leading the the well-behaved error signals:
+If, instead, we use Cross-Entropy loss, the logarithm perfectly cancels out the softmax derivative, leading the clean and simple error signals:
 \begin{equation}
     \label{eq:ce-loss-with-softmax}
     \begin{split}
-        \delta^{(2)i}_\eta &=\\[4pt]
-        \delta^{(1)i}_\mu &=
+        \delta^{(2)i}_\eta &= \hat y^i_\eta - y^i_\eta\\[4pt]
+        \delta^{(1)i}_\mu &= \left(\hat y^i_\eta - y^i_\eta\right)w^{(2)}_{\eta\mu}\,\sigma^{(1)\prime}(u^i_\mu)
     \end{split}
 \end{equation}
 
+The error signals derived from Eq. \eqref{eq:ce-loss-with-softmax} are not only clean and simple but also exhibit notably desirable behavior: the error is at its maximum precisely when the model is most mistaken. This behavior steers the model's learning in the right direction. It is a classic example of the importance of using the appropriate combinations of loss function and activation function. Table \ref{tab:loss_activations} summarizes the most relevant known use cases.
 
-\newpage
-
-\begin{table}[htbp]
-  \centering
-  \caption{Loss Functions and Output Layer Activations by Machine Learning Task}
-  \label{tab:loss_activations}
-  \vspace{0.5em}
-  \small
-  \begin{tabularx}{\textwidth}{p{2.8cm} X p{2.2cm} p{3.2cm} p{3.2cm}}
-    \toprule
-    \textbf{Problem Type} & \textbf{Target Variable ($y$) Format} & \textbf{Output Activation} & \textbf{Primary Loss Function} & \textbf{Alternative Loss Functions} \\
-    \midrule
-    \textbf{Binary Classification} & Single value: $0$ or $1$ & Sigmoid & Binary Cross-Entropy (Log Loss) & Focal Loss, Hinge Loss (SVM) \\
-    \addlinespace
-    \textbf{Multi-Class Classification} & One-Hot Encoded Vector or Single Integer Index & Softmax & Categorical Cross-Entropy\textsuperscript{*} & Focal Loss, KL Divergence \\
-    \addlinespace
-    \textbf{Multi-Label Classification} & Binary Vector (e.g., $[1, 0, 1]$) & Sigmoid (element-wise) & Binary Cross-Entropy & Binary Focal Loss \\
-    \addlinespace
-    \textbf{Regression} & Real numbers ($y \in \mathbb{R}$) & Linear (None) & Mean Squared Error (MSE) & Mean Absolute Error (MAE), Huber Loss, Log-Cosh \\
-    \addlinespace
-    \textbf{Non-Negative Regression} & Non-negative real numbers ($y \ge 0$) & ReLU or Softplus & MSE or MAPE & Poisson Loss \\
-    \addlinespace
-    \textbf{Bounded Regression} & Range-bounded values, e.g., $[0, 1]$ & Sigmoid & MSE or MAE & Binary Cross-Entropy \\
-    \bottomrule
-  \end{tabularx}
-  \begin{flushleft}
-    \footnotesize\textsuperscript{*} Use Sparse Categorical Cross-Entropy when targets are single integer class labels.
-  \end{flushleft}
-\end{table}
-
-This can be done with the following code snippet:
+The implementation of the cross-entropy loss function in Keras for our (8, 12, 5) network can be achieved with the following code snippet. The complete, functional code is available in the GitHub repository.
 
 \vspace{10pt}
 \begin{lstlisting}
@@ -515,6 +486,35 @@ model.compile(
 )
 \end{lstlisting}
 \vspace{10pt}
+
+\newpage
+
+\begin{table}[htbp]
+  \centering
+  \caption{Loss Functions and Output Layer Activations by Machine Learning Task}
+  \label{tab:loss_activations}
+  \vspace{0.5em}
+  \small
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.8cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{2.2cm} >{\raggedright\arraybackslash}p{3.2cm}}
+    \toprule
+    \textbf{Problem Type} & \textbf{Output} & \textbf{Output \newline Activation} & \textbf{Loss Function}\\
+    \midrule
+    \textbf{Binary Classification} & Single value: $0$ or $1$ & Sigmoid & Binary Cross-Entropy (Log Loss)\\
+    \addlinespace
+    \textbf{Multi-Class Classification} & One-Hot Encoded Vector or Single Integer Index & Softmax & Categorical Cross-Entropy\\
+    \addlinespace
+    \textbf{Multi-Label Classification} & Binary Vector (e.g., $[1, 0, 1]$) & Sigmoid (element-wise) & Binary Cross-Entropy\\
+    \addlinespace
+    \textbf{Regression} & Real numbers ($y \in \mathbb{R}$) & Linear (None) & Mean Squared Error (MSE)\\
+    \addlinespace
+    \textbf{Non-Negative Regression} & Non-negative real numbers ($y \ge 0$) & ReLU or Softplus & MSE or MAPE\\
+    \addlinespace
+    \textbf{Bounded Regression} & Range-bounded values, e.g., $[0, 1]$ & Sigmoid & MSE or MAE\\
+    \bottomrule
+  \end{tabularx}
+  \begin{flushleft}
+  \end{flushleft}
+\end{table}
 
 %Take a moment to get acquainted to the nomenclature before we proceed to training of this model.
 
