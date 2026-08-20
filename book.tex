@@ -267,7 +267,7 @@ As the name suggests, the error signals will {\it signal} the neurons in which d
 
 Phew! Much cleaner than \eqref{eq:chain-partials}! And in return we've gained an astonishing behaviour: instead of computing all the messy partial derivatives in \eqref{eq:chain-partials}, all we need to do in order to calibrate each neuron's parameters is to compute its respective error signal and apply elementary algebra. This shortcut is called {\it backpropagation}. The name stems from the fact that, starting at the output and going backwards, each crossed layer will render the neuron one error signal. Look carefully: $a$ and $b$ each gained a $\delta^{(2)}_i$ plus $z_i$ for $a$; similarly, $c$ and $b$ each gained a $\delta^{(1)}_i$ plus $x_i$ for $c$. Were there a third layer, the recipe would repeat.
 
-This behaviour, showed up explicitly in this two-neuron toy model, is in fact a general rule to networks of any size. This prepares our terrain for the next chapter.
+This behaviour, shown up explicitly in this two-neuron toy model, is in fact a general rule to networks of any size. This prepares our terrain for the next chapter.
 
 
 \chapter{Multi-neuron ML}
@@ -435,26 +435,31 @@ model = keras.Sequential(
 
 The above implementation faithfully represents the network depicted in the figure of the preceding Chapter: an input layer that receives vectors of dimension 8, followed by a hidden layer of 12 neurons with ReLU activation, and an output layer of 5 neurons with softmax activation.
 
-The ReLU activation of the hidden layer, given by,
+The ReLU activation of the hidden layer, given by
 \begin{equation}
     \sigma_\text{ReLU}(x) = \max(0,x)
 \end{equation}
 is a fairly standard choice in many modern applications (it simply returns $x$ if $x>0$ and $0$ otherwise) due to its low computational cost and empirically proven efficiency. But, what about softmax activation in the output layer? Why did I choose it?
 
-Softmax activation, given by,
+Softmax activation, given by
 \begin{equation}
     \label{eq:softmax5}
-    \hat y_\eta=\sigma_\text{softmax}(v_\eta) = \frac{e^{v_\eta}}{\sum^5_{j=1} e^{v_j}}
+    \hat y_\eta=\sigma_\text{softmax}(v_\eta) = \frac{e^{v_\eta}}{\sum^5_{\kappa=1} e^{v_\kappa}}
 \end{equation}
-has one very powerful property: the output of all 5 neurons sums to one, that is, $\sum_{\eta=1}^5\hat y_\eta=1$ (observe how all output neurons are coupled to each other through the denominator of \eqref{eq:softmax5}). Each output value $\hat y_\eta$, therefore, can be interpreted as the probability that input $x_\nu$ belongs to class $\eta$. Therefore, the choice of softmax activation in the output layer made this network suitable for handling classification problems: given a set of features\footnote{The coordinates of a datapoint, that is, the information characterizing that datapoint, are called features.} $x_\nu$, the model answers ``to which class $\eta$ does this data point belong?´´
+has one very powerful property: the output of all 5 neurons sums to one, that is, $\sum_{\eta=1}^5\hat y_\eta=1$ (observe how all output neurons are coupled to each other through the denominator of \eqref{eq:softmax5}). Each output value $\hat y_\eta$, therefore, can be interpreted as the probability that input $x_\nu$ belongs to class $\eta$. Therefore, the choice of softmax activation in the output layer made this network suitable for handling classification problems: given a set of features\footnote{The coordinates of a datapoint, that is, the information characterizing that datapoint, are called features.} $x_\nu$, the model answers ``to which class $\eta$ does this data point belong?''
 
 To complete the model, the loss function and the learning rate must be chosen. In the first Chapter, we used the Mean Squared Error loss function from equation \eqref{eq:mse-loss} to derive the backpropagation formulas, as it was the most intuitive loss function to introduce the topic in the context of fitting experimental data points. However, when a network employs softmax activation, the MSE loss function is no longer a suitable choice; instead, the Cross-Entropy loss function should be used:
 \begin{equation}
     \label{eq:Lce}
-    L_{\text CE} = -\sum_{i=1}^N\sum^5_{\eta=1} y^i_\eta\log(\hat y^i_\eta)
+    L_\text{CE} = -\sum_{i=1}^N\sum^5_{\eta=1} y^i_\eta\log(\hat y^i_\eta)
 \end{equation}
 
-Had we used MSE loss, the error signals from \eqref{eq:multi-error-signals} would read
+Had we used MSE loss,
+\begin{equation}
+    \label{eq:multi-mse-loss}
+    L_\text{MSE} = \frac{1}{N}\sum_{i=1}^N\sum^5_{\eta=1}\left(y^i_\eta - \hat y^i_\eta\right)^2
+\end{equation}
+the error signals from \eqref{eq:multi-error-signals} would read
 \begin{equation}
     \label{eq:mse-loss-with-softmax}
     \begin{split}
@@ -462,9 +467,9 @@ Had we used MSE loss, the error signals from \eqref{eq:multi-error-signals} woul
         \delta^{(1)i}_\mu &= \delta^{(2)i}_\eta\,w^{(2)}_{\eta\mu}\,\sigma^{(1)\prime}(u^i_\mu)
     \end{split}
 \end{equation}
-which has the following problematic behaviour: the whole error signal carries an overall factor $\hat y^i_\eta$. If the model makes a confidently wrong prediction (e.g., target $y^i_\eta = 1$, but predicted $\hat{y}^i_\eta \approx 0$), the bracket remains of order one while that prefactor collapses. As a result, the entire gradient vanishes, making weight updates nearly zero when the error is at its largest. The network stops learning precisely when it needs to adjust the most\footnote{This paragraph was writen by Gemini and adapter to index-notation by Claude. They gave such clear explanation that I decided to Ctrl+C.}.
+which has the following problematic behaviour: the whole error signal carries an overall factor $\hat y^i_\eta$. If the model makes a confidently wrong prediction (e.g., target $y^i_\eta = 1$, but predicted $\hat{y}^i_\eta \approx 0$), the bracket remains of order one while that prefactor collapses. As a result, the entire gradient vanishes, making weight updates nearly zero when the error is at its largest. The network stops learning precisely when it needs to adjust the most\footnote{This paragraph was written by Gemini and adapted to index notation by Claude. They gave such a clear explanation that I decided to Ctrl+C.}.
 
-If, instead, we use Cross-Entropy loss, the logarithm perfectly cancels out the softmax derivative, leading the clean and simple error signals:
+If, instead, we use Cross-Entropy loss, the logarithm perfectly cancels out the softmax derivative, leading to the clean and simple error signals:
 \begin{equation}
     \label{eq:ce-loss-with-softmax}
     \begin{split}
@@ -473,9 +478,9 @@ If, instead, we use Cross-Entropy loss, the logarithm perfectly cancels out the 
     \end{split}
 \end{equation}
 
-The error signals derived from Eq. \eqref{eq:ce-loss-with-softmax} are not only clean and simple but also exhibit notably desirable behavior: the error is at its maximum precisely when the model is most mistaken. This behavior steers the model's learning in the right direction. It is a classic example of the importance of using the appropriate combinations of loss function and activation function. Table \ref{tab:loss_activations} summarizes the most relevant known use cases.
+The error signals derived from Eq. \eqref{eq:ce-loss-with-softmax} are not only clean and simple but also exhibit notably desirable behaviour: the error is at its maximum precisely when the model is most mistaken. This behaviour steers the model's learning in the right direction. It is a classic example of the importance of using the appropriate combinations of loss function and activation function. Table \ref{tab:loss_activations} summarizes the most relevant known use cases.
 
-The implementation of the cross-entropy loss function in Keras for our (8, 12, 5) network can be achieved with the following code snippet. The complete, functional code is available in the GitHub repository.
+The implementation of the cross-entropy loss function in Keras for our (8, 12, 5) network can be achieved with the following code snippet. The complete, functional code is available in the GitHub repository, alongside several other didactic examples covering different activation-loss configurations.
 
 \vspace{10pt}
 \begin{lstlisting}
@@ -495,24 +500,32 @@ model.compile(
   \label{tab:loss_activations}
   \vspace{0.5em}
   \small
-  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.8cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{2.2cm} >{\raggedright\arraybackslash}p{3.2cm}}
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{2.2cm} >{\raggedright\arraybackslash}p{3.4cm}}
     \toprule
-    \textbf{Problem Type} & \textbf{Output} & \textbf{Output \newline Activation} & \textbf{Loss Function}\\
+    \textbf{Problem Type} & \textbf{Network output} & \textbf{Activation} & \textbf{Loss Function}\\
     \midrule
-    \textbf{Binary Classification} & Single value: $0$ or $1$ & Sigmoid & Binary Cross-Entropy (Log Loss)\\
+    \textbf{Binary Classification} & One probability, $\hat y\in(0,1)$ & Sigmoid & Binary Cross-Entropy (Log Loss)\\
     \addlinespace
-    \textbf{Multi-Class Classification} & One-Hot Encoded Vector or Single Integer Index & Softmax & Categorical Cross-Entropy\\
+    \textbf{Multi-Class Classification} & Coupled probabilities, $\sum_\eta\hat y_\eta=1$ & Softmax & Categorical Cross-Entropy\\
     \addlinespace
-    \textbf{Multi-Label Classification} & Binary Vector (e.g., $[1, 0, 1]$) & Sigmoid (element-wise) & Binary Cross-Entropy\\
+    \textbf{Multi-Label Classification} & Independent probabilities, each $\hat y_\eta\in(0,1)$ & Sigmoid (element-wise) & Binary Cross-Entropy\\
     \addlinespace
-    \textbf{Regression} & Real numbers ($y \in \mathbb{R}$) & Linear (None) & Mean Squared Error (MSE)\\
+    \textbf{Regression} & Unbounded real value, $\hat y\in\mathbb{R}$ & Linear (None) & Mean Squared Error (MSE)\\
     \addlinespace
-    \textbf{Non-Negative Regression} & Non-negative real numbers ($y \ge 0$) & ReLU or Softplus & MSE or MAPE\\
+    \textbf{Non-Negative Regression} & Non-negative real value, $\hat y\ge0$ & ReLU or Softplus & MSE or MAPE\\
     \addlinespace
-    \textbf{Bounded Regression} & Range-bounded values, e.g., $[0, 1]$ & Sigmoid & MSE or MAE\\
+    \textbf{Bounded Regression} & Bounded value, $\hat y\in(0,1)$, rescaled to the desired range & Sigmoid & MSE or MAE\\
     \bottomrule
   \end{tabularx}
   \begin{flushleft}
+  \small
+  MSE: Mean Squared Error. MAE: Mean Absolute Error. MAPE: Mean Absolute Percentage Error.
+
+  \vspace{0.3em}
+  The second column describes what the network {\it emits}, not the format in which the target is supplied: for multi-class problems the target $y^i_\eta$ may be given either as a one-hot vector, as in \eqref{eq:Lce}, or as a single integer class index. The two are numerically equivalent, and frameworks provide a separate ``sparse'' entry point for the latter.
+
+  \vspace{0.3em}
+  Compare the second and third rows, as they are the two faces of the discussion following \eqref{eq:multi-error-signals}: softmax couples the output neurons through a shared normalization, so its derivative carries the cross-terms, whereas an element-wise sigmoid leaves every neuron independent and its derivative is purely diagonal. Same number of neurons, same probabilities---but one layer converses with itself and the other does not.
   \end{flushleft}
 \end{table}
 
