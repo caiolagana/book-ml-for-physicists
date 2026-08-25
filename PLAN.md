@@ -1,3 +1,7 @@
+# Prompt
+
+I am writting this book book.tex I covered neural networks of dense, fully connected layers. Now I would like to introduce advanced topics, of networks of different topologies. What topics do you recomend, in order of complexity? Point out any theorems relevant at each topic, as well as literature papers.
+
 # PLAN.md — Advanced Architectures: A Roadmap for *Machine Learning for Physicists*
 
 **Status:** planning document. Nothing here has been written into `book.tex`.
