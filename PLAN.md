@@ -218,7 +218,7 @@ Instead of learning a map $F$, learn the *deviation from doing nothing*:
 
 $$z^{(\ell+1)}_\mu = z^{(\ell)}_\mu + F_\mu\big(z^{(\ell)}\big).$$
 
-In the language of §0, $w \to \mathds{1} + W$. The network is now a perturbation
+In the language of §0, $w \to 1 + W$. The network is now a perturbation
 around the identity, and — crucially — the backward Jacobian becomes
 
 $$\frac{\partial z^{(\ell+1)}_\mu}{\partial z^{(\ell)}_\nu}
@@ -482,7 +482,7 @@ clipping) and motivates the real one (gating).
 ### Gating (LSTM/GRU) — the point to make
 The LSTM's cell state has an *additive* update, $c_t = f_t \odot c_{t-1} + i_t \odot g_t$.
 When the forget gate $f_t \approx 1$ this is precisely the residual/identity
-trick of Chapter 6 applied along time: the Jacobian gets a term $\approx \mathds{1}$
+trick of Chapter 6 applied along time: the Jacobian gets a term $\approx 1$
 and the memory persists. Presenting LSTM as "Chapter 6, but in the time
 direction, with learned gates controlling the effective spectral radius" makes
 an architecture that is usually memorised into something derived.
@@ -790,7 +790,7 @@ essentially teaches itself.
   **Gibbs' inequality** $D_{\rm KL}\ge 0$ with equality iff the distributions
   agree; optionally the **Donsker–Varadhan** variational representation of KL.
 - **The reparametrisation trick.** Write $z = \mu_\phi(x) + \sigma_\phi(x)\odot\epsilon$
-  with $\epsilon\sim\mathcal{N}(0,\mathds{1})$, so that the randomness carries no
+  with $\epsilon\sim\mathcal{N}(0,1)$, so that the randomness carries no
   parameters and the gradient can pass through. Derive why the naive
   score-function estimator has higher variance — this is the one genuinely new
   piece of calculus in the chapter, and it is worth doing slowly.
@@ -943,10 +943,10 @@ balance, annealed importance sampling.
 
 ### The construction
 **Forward** (fixed, no learning): progressively destroy the data with noise,
-$q(x_t|x_{t-1}) = \mathcal{N}\big(\sqrt{1-\beta_t}\,x_{t-1},\,\beta_t \mathds{1}\big)$,
+$q(x_t|x_{t-1}) = \mathcal{N}\big(\sqrt{1-\beta_t}\,x_{t-1},\,\beta_t 1\big)$,
 which in the continuum is an Ornstein–Uhlenbeck SDE
 $dx = -\tfrac{1}{2}\beta(t)\,x\,dt + \sqrt{\beta(t)}\,dW$, driving any
-distribution to $\mathcal{N}(0,\mathds{1})$ — thermalisation.
+distribution to $\mathcal{N}(0,1)$ — thermalisation.
 
 **Reverse** (learned): run the diffusion backwards. The remarkable fact is that
 the time-reversed process is again a diffusion, with drift corrected by the
