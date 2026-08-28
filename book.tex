@@ -271,6 +271,7 @@ This behaviour, shown up explicitly in this two-neuron toy model, is in fact a g
 
 
 \chapter{Multi-neuron ML}
+\label{chap:mlp}
 
 We now have all necessary ingredients to build a multi-neuron network. So, let's do it! The first step is to adapt the input layer to be able to receive, instead of a single scalar $x$, a more generic object. You may argue ``the most generic object is an $N\times M$ matrix, or a tensor of arbitrary rank!'' And you're right, as I thought I was the first time I philosophized about the subject. However... When you stop to think about it, you realize that any generic object, whether it is a matrix or a tensor, can be {\it flattened} to a vector of some dimension. This flattening process can always take place outside of the network, in a data preprocessing stage. So, as far as the network itself is concerned, the most general input object is an $N$-dimensional vector.
 
@@ -530,6 +531,31 @@ model.compile(
 \end{table}
 
 %Take a moment to get acquainted to the nomenclature before we proceed to training of this model.
+
+
+\chapter{Towards advanced topics}
+
+All the theory presented so far forms a solid foundation for us to begin discussing more advanced topics. I would like to start by stating the
+
+\begin{quote}
+{\bf Universal Approximation Theorem:} a feedforward neural network\footnote{A feedforward neural network is precisely what we built in Chapter \ref{chap:mlp}: a network in which information flows in a single direction, layer by layer, without cycles or feedback. One point worth noting: the backpropagation of Eq. \eqref{eq:multi-error-signals} does indeed propagate error signals in the reverse direction; however, this does not cause the network to cease being feedforward. The term feedforward actually refers to the flow $x\mapsto\hat y$.} with a single hidden layer containing a finite number of neurons can approximate any continuous function on compact subsets of $\mathbb{R}^n$ to any desired degree of accuracy, given appropriate non-linear activation functions.
+\end{quote}
+
+Mathematically, a single-hidden-layer network outputs
+\begin{equation}
+    \label{eq:universal-theorem}
+    f(x) = \sum_{i=1}^N v_i \sigma(w_i^T x + b_i)
+\end{equation}
+where $w_i \in \mathbb{R}^n$ and $v_i, b_i \in \mathbb{R}$ are weights and biases, and $\sigma$ is the activation function. The theorem guarantees that for any target continuous function $F: K \to \mathbb{R}$ on a compact set $K \subset \mathbb{R}^n$ and any arbitrary precision $\varepsilon > 0$, there exists a network $f(x)$ such that
+\begin{equation}
+    \label{eq:sup-universal-theorem}
+    \sup_{x \in K} \vert{}f(x) - F(x)\vert{} < \varepsilon
+\end{equation}
+
+The paragraph above is a bit more mathematical than the rest of the book used to be—in fact, I copied and pasted it from Gemini—but a little calculus will enable you to understand it thoroughly. Recall Chapter \ref{chap:single-neuron}, in which we first introduced a neural network as the fitting of a function to data. Now, imagine a multidimensional space filled with data points; suppose there exists a network, $F(x)$, that fits all this data. Then the theorem guarantees that there always exists a function $f(x)$, in the form of Eq. \eqref{eq:universal-theorem}, capable of approximating $F(x)$ to any desired precision $\varepsilon$.
+
+So, can we now solve any problem with the network from Chapter \ref{chap:mlp}? Do we simply insert an arbtrary number of neurons in the hidden layer and... well, not so fast! The theorem guarantees the existence of such a network, but never provides the recipt for finding its weights and bias. Furthermore, a ``finite number'' of neurons can be something frighteningly large, and the more neurons there are, the harder convergence becomes, due to peaks and valleys in the loss surface and computational cost. This is where our advanced topics begin: we will explore techniques that allow us to find $f(x)$ efficiently in order to solve specific problems.
+
 
 
 \chapter{Appendix A}
